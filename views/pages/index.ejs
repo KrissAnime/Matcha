@@ -5,6 +5,34 @@
 <header>
     <% include ../partials/header %>
 </header>
-
-    
-<% include ../partials/footer %>
+<div class='central_grid' l3 s2>
+    <% users.forEach(function(user){ %>
+        <div>
+            <div class="central_grid_item">
+                <div class="central_grid_picture" style="background-image: url('/extra/profiles/<%= user.profile %>')">
+                </div>
+                <div id="user_name">
+                    <%= user.username %>
+                </div>
+                <div id="user_age">
+                    Age: <%= user.age %>
+                </div>
+                <div id="fame_rating_index">
+                    <% for (var i = 0; i < user.fame_rating; i++){ %>
+                        
+                        <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
+                        <% } %>
+                    <% while (i < 5){ %>
+                        <i class="far fa-star" stule="width: 12px;"></i>
+                        <% i++ %>
+                    <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- <li> <%= user.first_name %> </li> -->
+                <% }) %>
+            </div>
+            <div id="pagination">Pagination goes here</div>
+            
+            <% include ../partials/footer %>

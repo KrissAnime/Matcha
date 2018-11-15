@@ -1,0 +1,53 @@
+#login_class{
+    margin: auto;
+    margin-left: 23%;
+    margin-top: 20%;
+    width: 350px;
+    background-color: grey;
+    padding: 5px;
+	border-radius: 2%;
+}
+
+#registration_box {
+	background-color: grey;
+	display: block;
+	width: 300px;
+	margin: auto;
+    margin-left: 23%;
+    margin-top: 20%;
+	padding: 7px;
+	border-radius: 2%;
+}
+
+#user_name{
+    width: 100%;
+    height: 25px;
+    margin: auto;
+    margin-top: 1%;
+    align-content: center;
+    text-align: center;
+    font-family: "Times New Roman", Times, serif;
+    font-style: oblique;
+    font-size: 20px;
+    font-weight: bold;
+    /* margin-top: 100%; */
+    /* background-color: red; */
+}
+
+#user_age{
+    float: right;
+    width: 50%;
+    height: 20px;
+    font-weight: bold;
+    /* background-color: blue; */
+    text-align: center;
+}
+
+#fame_rating_index{
+    float: left;
+    font-weight: bold;
+    width: 50%;
+    height: 20px;
+    text-align: center;
+    /* background-color: gold; */
+}

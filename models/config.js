@@ -1,52 +1,334 @@
+var users = [
+  {
+      "first_name": "Crescendo",
+      "last_name": "Bester",
+      "user_name": "KrissAnime",
+      "email": "krissultimatum@gmail.com",
+      "password": "",
+      "fame_rating": "4",
+      "age": "23",
+      "gender": "0",
+      "sexual_pref": "0",
+      "bio": "I am the creator of the site",
+      "bio2": "",
+      "bio3": "",
+      "bio4": "",
+      "interests": "Coding, Gaming, Fanfiction, Eating",
+      "profile": "001.jpg"
+  },
+  
+  {
+      "first_name": "General",
+      "last_name": "Esdeath",
+      "user_name": "Ice Queen",
+      "email": "krissultimatum+iceqeen@gmail.com",
+      "password": "",
+      "fame_rating": "5",
+      "age": "23",
+      "gender": "1",
+      "sexual_pref": "0",
+      "bio": "Esdeath was a sadist who lacked empathy for people of whom she deemed weak, since she lives by her father's philosophy ('The strong survive and the weak die'). \n",
+      "bio2": "She enjoyed putting her enemies through great pain, both physically and emotionally. She had no qualms about killing innocent people to get what she wanted, and rationalized her behavior with her father's old creed.",
+      "bio3": "",
+      "bio4": "",
+      "interests": "Torture, War, Bloodshed, Sadism",
+      "profile": "002.jpg"
+  },
+  
+  {
+      "first_name": "Leone",
+      "last_name": "Lionelle",
+      "user_name": "Cat Girl",
+      "email": "krissultimatum+catgirl@gmail.com",
+      "password": "",
+      "fame_rating": "4.5",
+      "age": "21",
+      "gender": "1",
+      "sexual_pref": "3",
+      "bio": "She has a very relaxed, upbeat, and cheerful personality, and tends to display a lack of ladylike manners, often seen shoving Tatsumi into her breasts, putting her feet on the table, or consuming large amounts of sake. \n",
+      "bio2": "She serves as a sort of big sister figure to Tatsumi and younger members in Night Raid, often referring to herself as 'onee-san'.\n",
+      "bio3": "Despite the morally dodgy nature that she sometimes displayed, Leone is not one to tolerate injustice, and can be especially vicious to those who commit the vilest of acts. She also enjoys fighting her enemies a lot, as said by Najenda who told her that she needs to change that habit.",
+      "bio4": "",
+      "interests": "Drinking, Fighting, Relaxing",
+      "profile": "003.jpg"
+  },
+  
+  {
+      "first_name": "Sarah",
+      "last_name": "Kerrigan",
+      "user_name": "Queen of Blades",
+      "email": "krissultimatum+bladequeen@gmail.com",
+      "password": "",
+      "fame_rating": "5",
+      "age": "35",
+      "gender": "1",
+      "sexual_pref": "3",
+      "bio": "Sarah Louise Kerrigan was a psychic terran female. She began her career as a Confederate ghost and later became the second-in-command of the Sons of Korhal. Following Arcturus Mengsk's betrayal, she was captured and infested by the Zerg Swarm, ultimately becoming the self-proclaimed Queen of Blades (a.k.a. the Zerg Queen) and leader of the Swarm.",
+      "bio2": "At the Dominion Ghost Academy, ghosts in training are told the Confederacy allowed Kerrigan to 'defect' to the zerg. Non-control zerg strains referred to her as 'the Kerrigan.'",
+      "bio3": "",
+      "bio4": "",
+      "interests": "Ruling the Swarm, Killing Acturus",
+      "profile": "004.jpg"
+  },
+  
+  {
+      "first_name": "November",
+      "last_name": "Terra",
+      "user_name": "Nova",
+      "email": "krissultimatum+nova@gmail.com",
+      "password": "",
+      "fame_rating": "4",
+      "age": "23",
+      "gender": "1",
+      "sexual_pref": "1",
+      "bio": "November 'Nova' Terra was a member of the Terra family, one of the Terran Confederacy's rich and powerful 'Old Families'.\n",
+      "bio2": "She is the youngest child of Bella and Constantino Terra, and had two siblings -- Clara and Zeb.\n",
+      "bio3": "The family lived in the Terra Skyscraper in Tarsonis City, Tarsonis. She possessed a degree of empathy that was generally lacking in the Old Families, a trait that did not go unnoticed.\n",
+      "bio4": "She also believed strongly in the concept of fair play. She was regarded as the 'golden child' of the family.",
+      "interests": "Covert Ops, Sniping, Hacking",
+      "profile": "005.jpg"
+  },
+  
+  {
+      "first_name": "Orphea",
+      "last_name": "Raven",
+      "user_name": "Raven Girl",
+      "email": "krissultimatum+ravengirl@gmail.com",
+      "password": "",
+      "fame_rating": "3.5",
+      "age": "18",
+      "gender": "1",
+      "sexual_pref": "1",
+      "bio": "Orphea's upbringing was lonely, but she found comfort and connection with ancestral magic. Orphea's mother left the family early in Orphea's life, fearing what would happen if her father Oberon, Raven Lord, tapped into the Dark Nexus.\n",
+      "bio2": "Oberon promised Orphea not to tap into this power, but he broke this promise, pushing Orphea away. Later her father sends out Knights to find her.\n",
+      "bio3": "While Deckard Cain wanders around the forests of Dragon Shire, he is attacked by those knights. Orphea joins the clash and helps Cain defeating the knights. Deckard Cain and Orphea team up to find a solution for the Dark Nexus threat raised by the Raven Lord. They come to Raena the Lady of Thorns and Realm Lord of Dragon Shire, for help and warn her about the danger coming. Raena calls on her greatest allies from across the lands and marches with them forward to battle the Raven Lord and his champions in Alterac Pass.",
+      "bio4": "Later Orphea witnessed her father defeating the Lady of Thorns and causing the fall of King's Crest. Vowing to stop her father from hurting anyone else, she chose to rise up against him and become a hero in the Nexus.",
+      "interests": "Nexus Battles, Dragon Riding, Ancestral Magic",
+      "profile": "006.jpg"
+  },
+  
+  {
+      "first_name": "Bulat",
+      "last_name": "Incursio",
+      "user_name": "Tyrant",
+      "email": "krissultimatum+tyrant@gmail.com",
+      "password": "",
+      "fame_rating": "3",
+      "age": "27",
+      "gender": "0",
+      "sexual_pref": "2",
+      "bio": "Bulat had a calm, kind personality; although he referred to himself as passionate and hot-blooded, he never actually lost his cool in battle.\n",
+      "bio2": "He was among the most compassionate members of the Night Raid and he taught Tatsumi to embrace these emotions but not to let them consume him.\n",
+      "bio3": "Leone informed Tatsumi that Bulat was gay, to which he replied, 'You don't want him to misunderstand, right?', but did not deny Leone's statement, while blushing heavily.\n",
+      "bio4": "Bulat flirted with Tatsumi on occasion, which made the latter extremely nervous.",
+      "interests": "Exercise, Styling Hair, Tatsumi",
+      "profile": "007.jpg"
+  },
+  
+  {
+      "first_name": "Erza",
+      "last_name": "Scarlet",
+      "user_name": "Titania",
+      "email": "krissultimatum+titania@gmail.com",
+      "password": "",
+      "fame_rating": "4",
+      "age": "26",
+      "gender": "1",
+      "sexual_pref": "1",
+      "bio": "Erza is a very strict person, often criticizing the bad behavior and habits of the other guild members, causing most of them to apologize, fearing that they might invoke her wrath.\n",
+      "bio2": "She is also very impatient, disliking people who don't answer her questions quickly enough.\n",
+      "bio3": "",
+      "bio4": "",
+      "interests": "Discipline, BDSM, Erotic Novels, Fighting",
+      "profile": "008.jpg"
+  },
+  {
+      "first_name": "Shirou",
+      "last_name": "Emiya",
+      "user_name": "Archer",
+      "email": "krissultimatum+archer@gmail.com",
+      "password": "",
+      "fame_rating": "3",
+      "age": "28",
+      "gender": "0",
+      "sexual_pref": "1",
+      "bio": "While he is thoroughly cynical and nihilistic, he is at the same time devoted and protective, and even a little childish to the point that it makes him hard to hate.\n",
+      "bio2": "He does not lie, but he does keep secrets and tell half truths.\n",
+      "bio3": "He means well and is capable of being nice, but often ends up being sarcastic, especially so when he gives advice.",
+      "bio4": "",
+      "interests": "Housework, Archery, Tinkering",
+      "profile": "009.jpg"
+  },
+];
+
+var crypto = require('crypto');
 var mysql = require('mysql');
 var db_name = "matcha";
 
 var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Asuka2016"
+  socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
+  host: "localhost",
+  user: "root",
+  password: "Asuka2016"
 });
 
+function encryption(password){
+  var master_key = crypto.createHash('sha512');
+  master_key.update(password);
+  var hash = master_key.digest('hex');
+  return hash;
+}
+
 con.connect(function(err) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Connected To Server!");
+  }
+  
+  var sql = "CREATE DATABASE IF NOT EXISTS ";
+  sql += db_name;
+  con.query(sql, function (err, result) {
     if (err){
-        console.log(err);
+      console.log(err);
     }
     else{
-        console.log("Connected!");
+      console.log("Database Created");
     }
-    
-    con.query("CREATE DATABASE IF NOT EXISTS ".db_name, function (err, result) {
+  });
+});
+
+    sql = "CREATE TABLE IF NOT EXISTS `matcha`.`users`";
+    sql += "(`user_id` INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY ,";
+    sql += " `unique_key` VARCHAR(255) NOT NULL ,";
+    sql += " `user_name` VARCHAR(50) NOT NULL ,";
+    sql += " `email` VARCHAR(50) NOT NULL ,";
+    sql += " `password` VARCHAR(255) NOT NULL,";
+    sql += " `verified` INT (1),";
+    sql += " `profile` VARCHAR(40),";
+    sql += " `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+    con.query(sql, function (err, result) {
       if (err){
         console.log(err);
       }
       else{
-        console.log("Database created");
+        console.log("Users Table Created");
       }
     });
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`profiles`";
+sql += "(`user_id` INT(6) NOT NULL PRIMARY KEY ,";
+sql += " `profile` VARCHAR(40) NOT NULL ,";
+sql += " `first_name` VARCHAR(30) NOT NULL ,";
+sql += " `last_name` VARCHAR(30) NOT NULL ,";
+sql += " `user_name` VARCHAR(50) NOT NULL ,";
+sql += " `fame_rating` INT(1) DEFAULT '0' ,";
+sql += " `age` INT(2) NOT NULL ,";
+sql += " `gender` INT(1) NOT NULL ,";
+sql += " `sexual_pref` INT(1) NOT NULL ,";
+sql += " `bio` VARCHAR(1500) NOT NULL ,";
+sql += " `interests` VARCHAR(1000) NOT NULL) ENGINE = InnoDB";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Profiles Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`images` ";
+sql += "(`user_id` INT(6) NOT NULL PRIMARY KEY ,";
+sql += " `profile` VARCHAR(40) NOT NULL ,";
+sql += " `img_01` VARCHAR(40) NOT NULL ,";
+sql += " `img_02` VARCHAR(40) NOT NULL ,";
+sql += " `img_03` VARCHAR(40) NOT NULL ,";
+sql += " `img_04` VARCHAR(40) NOT NULL )";
+sql += "ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Images Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`tags` ";
+sql += "(`tag_id` INT(3) NOT NULL AUTO_INCREMENT PRIMARY KEY ,";
+sql += " `tag_name` VARCHAR(30) NOT NULL) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Tags Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`verification` ";
+sql += "(`email` VARCHAR(50) NOT NULL PRIMARY KEY ,";
+sql += " `code` VARCHAR(40) NOT NULL) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Verification Table Created");
+  }
+});
+
+function escapeHtml(unsafe) {
+  return unsafe
+       .replace(/&/g, "&amp;")
+       .replace(/</g, "&lt;")
+       .replace(/>/g, "&gt;")
+       .replace(/"/g, "&quot;")
+       .replace(/'/g, "&#039;");
+}
+
+for (var x=0; x < 9; x++){
+  var pass = encryption(users[x].password);
+  var email = users[x].email;
+  var user_name = users[x].user_name;
+  var profile = users[x].profile;
+  var gender = users[x].gender;
+  var first_name = users[x].first_name;
+  var last_name = users[x].last_name;
+  var bio = escapeHtml(users[x].bio + users[x].bio2 + users[x].bio3 + users[x].bio4);
+  var fame_rating = users[x].fame_rating;
+  var gender = users[x].gender;
+  var sexual_pref = users[x].sexual_pref;
+  var interests = users[x].interests;
+  var age = users[x].age;
+  var key = encryption(user_name);
+
+  // sql = "INSERT INTO `matcha`.`users` ";
+  // sql += "(`user_id`, `unique_key`, `user_name`, `email`, `password`, `verified`, `profile`, `date`)";
+  // sql += " VALUES ('" + (x + 1) +  "', '" + key + "', '" + user_name + "', '" + email + "', '";
+  // sql += pass + "', '1" + "', '" + profile + "', CURRENT_TIMESTAMP)";
+  // con.query(sql, function (err, result) {
+  //   if (err){
+  //     console.log(err);
+  //   }
+  //   else{
+  //     console.log("User Created!");
+  //   }
+  // });
+
+  sql = "INSERT INTO `matcha`.`profiles` ";
+  sql += "(`user_id`, `profile`, `first_name`, `last_name`, `user_name`, `fame_rating`, `age`, `gender`, ";
+  sql +=  "`sexual_pref`, `bio`, `interests`)";
+  sql += " VALUES ('" + (x + 1) +  "', '" + profile + "', '" + first_name + "', '" + last_name + "', '";
+  sql += user_name +  "', '" + fame_rating + "', '" + age + "', '";
+  sql += gender +  "', '" + sexual_pref + "', '" + bio + "', '" + interests + "')";
+  con.query(sql, function (err, result) {
+    if (err){
+      console.log(err);
+    }
+    else{
+      console.log("User Created!");
+    }
   });
-
-// var con = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: "Asuka2016",
-//     database: db_name
-// });
-
-// con.connect(function(err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-//     var sql = "CREATE TABLE IF NOT EXISTS users";
-//     sql += "(user_id INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,";
-//     sql += " firstname VARCHAR(30) NOT NULL ,";
-//     sql += " lastname VARCHAR(30) NOT NULL ,";
-//     sql += " username VARCHAR(50) NOT NULL ,";
-//     sql += " email VARCHAR(50) NOT NULL ,";
-//     sql += " password VARCHAR(255) NOT NULL,";
-//     sql += " verified INT (1),";
-//     sql += " profile VARCHAR(40))";
-
-//     con.query(sql, function (err, result) {
-//       if (err) throw err;
-//       console.log("Table created");
-//     });
-//   });
+}

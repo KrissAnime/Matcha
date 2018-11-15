@@ -2,14 +2,15 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
-
 // require('./models/config');
+var mysql = require('mysql');
 
-
-var rawdata = require('./data/users.json');
-
-console.log(rawdata);
-
+var con = mysql.createConnection({
+    socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
+    host: "localhost",
+    user: "root",
+    password: "Asuka2016"
+});
 
 // Init App
 var app = express();
@@ -37,7 +38,7 @@ app.use(expressValidator({
         var namespace = param.split('.'),
         root = namespace.shift(),
         formParam = root;
-
+        
         while (namespace.length){
             form += '[' + namespace.shift() + ']';
         }
@@ -49,14 +50,37 @@ app.use(expressValidator({
     }
 }));
 
-// Home Page
-app.get('/', function(req, res){
-    res.render('pages/index', {
-        users: rawdata
-    });
+sql = "SELECT * FROM `matcha`.`profiles`";
+con.query(sql, function (err, result) {
+    if (err){
+        console.log(err);
+    }
+    else{
+        // console.log(result);
+        sql = "SELECT * FROM `matcha`.`users`";
+        con.query(sql, function (err, result2) {
+            // Home Page
+            // console.log(result2);
+            app.get('/', function(req, res){
+                res.render('pages/index', {
+                    users: result,
+                    profile: result2
+                });
+            });
+        })
+        
+    }
 });
 
+// Notifications Page
+app.get('/notifications', function(req, res){
+    res.render('pages/profile');
+});
 
+// Messages Page
+app.get('/messages', function(req, res){
+    res.render('pages/profile');
+});
 
 // Profile Page
 app.get('/profile', function(req, res){
