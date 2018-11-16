@@ -1,3 +1,5 @@
+// console.log("Log 1");
+
 var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
@@ -6,10 +8,10 @@ var expressValidator = require('express-validator');
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
-    socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
+    // socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
     host: "localhost",
     user: "root",
-    password: "Asuka2016"
+    password: ""
 });
 
 // Init App
@@ -38,7 +40,7 @@ app.use(expressValidator({
         var namespace = param.split('.'),
         root = namespace.shift(),
         formParam = root;
-        
+
         while (namespace.length){
             form += '[' + namespace.shift() + ']';
         }
@@ -50,25 +52,26 @@ app.use(expressValidator({
     }
 }));
 
+console.log("Log 1");
 sql = "SELECT * FROM `matcha`.`profiles`";
 con.query(sql, function (err, result) {
     if (err){
-        console.log(err);
+        // console.log(err);
     }
     else{
         // console.log(result);
         sql = "SELECT * FROM `matcha`.`users`";
         con.query(sql, function (err, result2) {
             // Home Page
-            // console.log(result2);
+            console.log(result2);
             app.get('/', function(req, res){
                 res.render('pages/index', {
-                    users: result,
-                    profile: result2
+                    profiles: result2,
+                    users: result
                 });
             });
         })
-        
+
     }
 });
 
