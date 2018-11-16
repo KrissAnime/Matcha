@@ -16,7 +16,7 @@ var users = [
       "interests": "Coding, Gaming, Fanfiction, Eating",
       "profile": "001.jpg"
   },
-  
+
   {
       "first_name": "General",
       "last_name": "Esdeath",
@@ -34,7 +34,7 @@ var users = [
       "interests": "Torture, War, Bloodshed, Sadism",
       "profile": "002.jpg"
   },
-  
+
   {
       "first_name": "Leone",
       "last_name": "Lionelle",
@@ -52,7 +52,7 @@ var users = [
       "interests": "Drinking, Fighting, Relaxing",
       "profile": "003.jpg"
   },
-  
+
   {
       "first_name": "Sarah",
       "last_name": "Kerrigan",
@@ -70,7 +70,7 @@ var users = [
       "interests": "Ruling the Swarm, Killing Acturus",
       "profile": "004.jpg"
   },
-  
+
   {
       "first_name": "November",
       "last_name": "Terra",
@@ -88,7 +88,7 @@ var users = [
       "interests": "Covert Ops, Sniping, Hacking",
       "profile": "005.jpg"
   },
-  
+
   {
       "first_name": "Orphea",
       "last_name": "Raven",
@@ -106,7 +106,7 @@ var users = [
       "interests": "Nexus Battles, Dragon Riding, Ancestral Magic",
       "profile": "006.jpg"
   },
-  
+
   {
       "first_name": "Bulat",
       "last_name": "Incursio",
@@ -124,7 +124,7 @@ var users = [
       "interests": "Exercise, Styling Hair, Tatsumi",
       "profile": "007.jpg"
   },
-  
+
   {
       "first_name": "Erza",
       "last_name": "Scarlet",
@@ -166,10 +166,10 @@ var mysql = require('mysql');
 var db_name = "matcha";
 
 var con = mysql.createConnection({
-  socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
+  // socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
   host: "localhost",
   user: "root",
-  password: "Asuka2016"
+  password: ""
 });
 
 function encryption(password){
@@ -186,7 +186,7 @@ con.connect(function(err) {
   else{
     console.log("Connected To Server!");
   }
-  
+
   var sql = "CREATE DATABASE IF NOT EXISTS ";
   sql += db_name;
   con.query(sql, function (err, result) {
@@ -304,18 +304,18 @@ for (var x=0; x < 9; x++){
   var age = users[x].age;
   var key = encryption(user_name);
 
-  // sql = "INSERT INTO `matcha`.`users` ";
-  // sql += "(`user_id`, `unique_key`, `user_name`, `email`, `password`, `verified`, `profile`, `date`)";
-  // sql += " VALUES ('" + (x + 1) +  "', '" + key + "', '" + user_name + "', '" + email + "', '";
-  // sql += pass + "', '1" + "', '" + profile + "', CURRENT_TIMESTAMP)";
-  // con.query(sql, function (err, result) {
-  //   if (err){
-  //     console.log(err);
-  //   }
-  //   else{
-  //     console.log("User Created!");
-  //   }
-  // });
+  sql = "INSERT INTO `matcha`.`users` ";
+  sql += "(`user_id`, `unique_key`, `user_name`, `email`, `password`, `verified`, `profile`, `date`)";
+  sql += " VALUES ('" + (x + 1) +  "', '" + key + "', '" + user_name + "', '" + email + "', '";
+  sql += pass + "', '1" + "', '" + profile + "', CURRENT_TIMESTAMP)";
+  con.query(sql, function (err, result) {
+    if (err){
+      console.log(err);
+    }
+    else{
+      console.log("User Created!");
+    }
+  });
 
   sql = "INSERT INTO `matcha`.`profiles` ";
   sql += "(`user_id`, `profile`, `first_name`, `last_name`, `user_name`, `fame_rating`, `age`, `gender`, ";
