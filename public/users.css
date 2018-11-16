@@ -52,3 +52,112 @@
     text-align: center;
     /* background-color: gold; */
 }
+
+#user_mega_bubble{
+    float: left;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+	min-height: 82vh;
+
+}
+
+#user_bio_details{
+    float: left;
+    width: 100%;
+    height: 100%;
+    background-color: aqua;
+    grid-area: left;
+}
+
+#user_bio_profile{
+    /* width: 100%; */
+    /* height: 70vh; */
+    /* height: 100%; */
+    display: block;
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover;
+    padding: 2px;
+    border-radius: 3%;
+    border: 2px solid black;
+    background-color: blueviolet;
+    grid-area: corner;
+}
+
+#user_other_details{
+    width: 100%;
+    float: right;
+    height: 100%;
+    background-color: grey;
+    grid-area: middle;
+}
+
+#profile_suggested_users{
+    width: 100%;
+    height: 100%;
+    background-color: greenyellow;
+    float: right;
+    grid-area: right;
+}
+
+#user_profile1{
+    display: block;
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover;
+    padding: 2px;
+    border-radius: 3%;
+    border: 2px solid white;
+    background-color: orange;
+    grid-area: user_profile1;
+}
+
+#user_profile2{
+    display: block;
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover;
+    padding: 2px;
+    border-radius: 3%;
+    border: 2px solid white;
+    background-color: yellow;
+    grid-area: user_profile2;
+}
+
+#user_profile3{
+    display: block;
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover;
+    padding: 2px;
+    border-radius: 3%;
+    border: 2px solid white;
+    background-color: red;
+    grid-area: user_profile3;
+}
+
+#user_profile4{
+    display: block;
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover;
+    padding: 2px;
+    border-radius: 3%;
+    border: 2px solid white;
+    background-color: plum;
+    grid-area: user_profile4;
+}
+
+.user_profiles{
+    display: grid;
+    grid-template-areas: 
+        'corner user_profile1 user_profile2 user_profile3 user_profile4 right'
+        'left middle middle middle middle right'
+        'left middle middle middle middle right'
+        'left middle middle middle middle right'
+        'left middle middle middle middle right';
+    min-height: 82vh;
+    grid-gap: 7px;
+    padding: 10px;
+}

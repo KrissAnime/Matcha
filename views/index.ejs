@@ -1,0 +1,38 @@
+<!-- views/pages/index.ejs -->
+
+
+<% include partials/head %>
+<header>
+    <% include partials/header %>
+</header>
+<div class='central_grid' l3 s2>
+    <% users.forEach(function(user){ %>
+        <div>
+            <div class="central_grid_item">
+                <a href="profiles/<%= user.unique_key %>">
+                    <div class="central_grid_picture" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
+                    </div>
+                </a>
+                <div id="user_name">
+                    <%= user.user_name %>
+                </div>
+                <div id="user_age">
+                    Age: <%= user.age %>
+                </div>
+                <div id="fame_rating_index">
+                    <% for (var i = 0; i < user.fame_rating; i++){ %>
+                        <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
+                        <% } %>
+                        <% while (i < 5){ %>
+                            <i class="far fa-star" stule="width: 12px;"></i>
+                            <% i++ %>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+            <div id="pagination">Pagination goes here</div>
+            
+            <% include partials/footer %>
+            

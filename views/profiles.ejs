@@ -1,0 +1,30 @@
+<% include partials/head %>
+<header>
+    <% include partials/header %>
+</header>
+
+<div class="user_profiles">
+    <% users.forEach(function(user){ %>
+        <div id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
+            <div class="" ></div>
+        </div>
+        <div id="user_bio_details">
+            <ul>
+                <li><%= user.user_name %></li>
+            </ul>
+        </div>
+        <div id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/7a249496375ed2573a820ebf6ce8d922.jpg')"></div>
+        <div id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/f83258d50f078eed583aa761fb72d68f.jpg')"></div>
+        <div id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/heroes+of+the+storm.jpeg')"></div>
+        <div id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/kerrigan-starcraft-2-wallpaper.jpg')"></div>
+        <div id="user_other_details"></div>
+        <div id="profile_suggested_users"></div>
+        <% }) %>
+        <% for(var pic=1; pic < 5; pic++){ %>
+            <div id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/7a249496375ed2573a820ebf6ce8d922.jpg')"></div>
+
+        <% } %>
+        
+    </div>
+    
+    <% include partials/footer %>
