@@ -16,6 +16,7 @@ var expressValidator = require('express-validator');
 // require('./models/config');
 const url = require('url');
 var mysql = require('mysql');
+require('./controllers/functions');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -152,9 +153,64 @@ app.get('/search', function(req, res){
             console.log(err);
         }
         else{
-            // console.log(result); 
-            console.log(req.body.age_select);
-            res.render('search', {tags: result});
+            var age = req.query.age_select;
+            var rating = req.query.rating_select;
+            var dist = req.query.distance_select;
+            var tag_1 = req.query.tag1_select;
+            var tag_2 = req.query.tag2_select;
+            var tag_3 = req.query.tag3_select;
+            var errors = 6;
+            // console.log(age)
+            var data = {
+                age: age,
+                rating: rating,
+                distance: dist,
+                tag_1: tag_1,
+                tag_2: tag_2,
+                tag_3: tag_3
+            };
+            if (!age){
+                errors--;
+                data.age = 1;
+            }
+            if (!rating){
+                errors--;
+                data.rating = 1;
+            }
+            if (!dist){
+                errors--;
+                data.distance = 1;
+            }
+            if (!tag_1){
+                errors--;
+                data.tag_1 = 1;
+            }
+            if (!tag_2){
+                errors--;
+                data.tag_2 = 1;
+            }
+            if (!tag_3){
+                errors--;
+                data.tag_3 = 1;
+            }
+            var fail = "False";
+            if (!errors){
+                fail = "True";
+            }
+            matches = "";
+            if (fail == "False"){
+                
+                matches = search_and_recover(data);
+            }
+            // errors = errors.split(",");
+            console.log(fail);
+            // console.log(age);
+            // console.log(rating);
+            // console.log(dist);
+            // console.log(tag_1);
+            // console.log(tag_2);
+            // console.log(tag_3);
+            res.render('search', {tags: result, fail: fail, matches: matches});
         }
     })
 });
