@@ -1,6 +1,3 @@
-
-const fs = require('fs');
-
 var users = [
   {
     "first_name": "Crescendo",
@@ -27,7 +24,7 @@ var users = [
     "email": "krissultimatum+iceqeen@gmail.com",
     "password": "",
     "fame_rating": "5",
-    "age": "23",
+    "age": "26",
     "gender": "1",
     "sexual_pref": "0",
     "bio": "Esdeath was a sadist who lacked empathy for people of whom she deemed weak, since she lives by her father's philosophy ('The strong survive and the weak die'). \n",
@@ -106,7 +103,7 @@ var users = [
     "bio2": "Oberon promised Orphea not to tap into this power, but he broke this promise, pushing Orphea away. Later her father sends out Knights to find her.\n",
     "bio3": "While Deckard Cain wanders around the forests of Dragon Shire, he is attacked by those knights. Orphea joins the clash and helps Cain defeating the knights. Deckard Cain and Orphea team up to find a solution for the Dark Nexus threat raised by the Raven Lord. They come to Raena the Lady of Thorns and Realm Lord of Dragon Shire, for help and warn her about the danger coming. Raena calls on her greatest allies from across the lands and marches with them forward to battle the Raven Lord and his champions in Alterac Pass.",
     "bio4": "Later Orphea witnessed her father defeating the Lady of Thorns and causing the fall of King's Crest. Vowing to stop her father from hurting anyone else, she chose to rise up against him and become a hero in the Nexus.",
-    "interests": "Nexus Battles, Dragon Riding, Ancestral Magic",
+    "interests": "Nexus Battles, Dragon Riding, Ancestral Magic, Commentating",
     "profile": "006.jpg"
   },
   
@@ -164,9 +161,9 @@ var users = [
   },
 ];
 
+const fs = require('fs');
 var crypto = require('crypto');
 var mysql = require('mysql');
-var db_name = "matcha";
 
 var con = mysql.createConnection({
   socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -174,6 +171,8 @@ var con = mysql.createConnection({
   user: "root",
   password: "Asuka2016"
 });
+
+var db_name = "matcha";
 
 function encryption(password){
   var master_key = crypto.createHash('sha512');
@@ -324,7 +323,7 @@ for (const item of users){
   });
   var index = 1;
   fs.readdirSync(temp_dir).forEach(file => {
-    if (file[0] != "." && index < 5){
+    if (file[0] != "." && index < 5 && file.length > 7){
       sql = "UPDATE `matcha`.`images` SET `img_0" + index + "` = ";
       sql += "'" + file + "' WHERE `images`.`unique_key` = '" + unique_key + "'";
       index++;
@@ -347,7 +346,7 @@ for (const item of users){
       console.log(err);
     }
     else{
-      console.log("User" + user_name +  "Created!");
+      console.log("User Created!");
     }
   });
   

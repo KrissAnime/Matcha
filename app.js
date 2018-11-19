@@ -1,5 +1,14 @@
 // console.log("Log 1");
 
+function escapeHtmlReverse(unsafe) {
+    return unsafe
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+}
+
 var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
@@ -54,19 +63,19 @@ app.use(expressValidator({
 }));
 
 // console.log("Log 1");
-sql = "SELECT * FROM `matcha`.`profiles`";
-con.query(sql, function (err, result) {
-    if (err){
-        // console.log(err);
-    }
-    else{
-        // Home Page
-        app.get('/', function(req, res){
+app.get('/', function(req, res){
+    sql = "SELECT * FROM `matcha`.`profiles`";
+    con.query(sql, function (err, result) {
+        if (err){
+            // console.log(err);
+        }
+        else{
+            // Home Page
             res.render('index', {
                 users: result
             });
-        });
-    }
+        }
+    });
 });
 
 app.get('/profiles/:unique_key', function(req, res, next) {
@@ -79,10 +88,22 @@ app.get('/profiles/:unique_key', function(req, res, next) {
             console.log(err);
         }
         else {
-            // console.log(result);
-            res.render('profiles', {users: result});
+            result[0].bio = escapeHtmlReverse(result[0].bio);
+            console.log(result);
+            sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = '";
+            sql += req.params.unique_key;
+            sql += "'";
+            con.query(sql, function (err, result2) {
+                if (err){
+                    console.log(err);
+                }
+                else{
+                    // console.log(result2);
+                    res.render('profiles', {users: result, images: result2});
+                }
+            })
             // next();
-            console.log("after render");
+            // console.log("after render");
         }
     })
 });
@@ -118,20 +139,30 @@ app.get('/profile', function(req, res){
     res.redirect('/');
 });
 
-//Browsing
-app.get('/browse', function(req, res){
-    res.render('browse');
-});
-
 //Registration
 app.get('/registration', function(req, res){
     res.render('registration');
 });
 
 //research
-app.get('/research', function(req, res){
-    res.render('research');
+app.get('/search', function(req, res){
+    sql = "SELECT * FROM `matcha`.`tags`";
+    con.query(sql, function (err, result){
+        if (err){
+            console.log(err);
+        }
+        else{
+            // console.log(result); 
+            console.log(req.body.age_select);
+            res.render('search', {tags: result});
+        }
+    })
 });
+
+//Manages all the searching
+app.post('/searcher', function(req, res){
+    console.log(req.body.age_select);
+})
 
 //Login Page
 app.get('/login', function(req, res){
@@ -142,3 +173,7 @@ app.get('/login', function(req, res){
 app.listen(3000, function(){
     console.log('Server started on port 3000...');
 });
+
+app.use(function (req, res){
+    res.render('error');
+})
