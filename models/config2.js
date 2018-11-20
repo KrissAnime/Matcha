@@ -54,7 +54,7 @@ con.query(sql, function (err, result) {
                 })
             }
             index++;
-        } 
+        }
     }
 });
 

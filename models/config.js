@@ -269,9 +269,56 @@ con.query(sql, function (err, result) {
   }
 });
 
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`likes` ";
+sql += "(`instigator` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += " `choice` VARCHAR(6), `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Likes Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`messaging` ";
+sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += " `message` VARCHAR(1000), `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Messaging Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`block` ";
+sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += " `status` BOOLEAN, `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Block Table Created");
+  }
+});
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`user_tags`";
+sql += "(`user_id` INT(6) NOT NULL, `tag_id` INT(3) NOT NULL) ENGINE = InnoDB;";
+con.query(sql, function(err, result){
+    if (err){
+        console.log(err);
+    }
+    else{
+        console.log("User Tags Table Created");
+    }
+})
+
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`verification` ";
 sql += "(`email` VARCHAR(50) NOT NULL PRIMARY KEY ,";
-sql += " `code` VARCHAR(40) NOT NULL) ENGINE = InnoDB;";
+sql += " `code` VARCHAR(255) NOT NULL) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -289,7 +336,7 @@ function escapeHtml(unsafe) {
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 }
-
+/*
 var x = 0;
 for (const item of users){
   var pass = encryption(item.password);
@@ -306,7 +353,7 @@ for (const item of users){
   var interests = item.interests;
   var age = item.age;
   var unique_key = encryption(user_name);
-  const dir = "./public/extra/profiles/";
+  const dir = "../public/extra/profiles/";
   
   // console.log("Before new loop");
   var temp_dir = dir + user_name;
@@ -361,8 +408,8 @@ for (const item of users){
       console.log(err);
     }
     else{
-      console.log("Profile Entry" + user_name + " Created!");
+      console.log("Profile Entry Created!");
     }
   });
   x++;
-}
+}*/

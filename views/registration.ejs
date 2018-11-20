@@ -4,7 +4,7 @@
 </header>
 
 <div id="registration_box">
-    <form action="" method="post" id="registration_form" name="registration_form">
+    <form action="/register_me" method="POST" id="registration_form" name="registration_form">
         <label>First Name:</label> <input type="text" size="30" id="firstname" name="firstname" placeholder="First Name..."><br/>
         <label>Last Name:</label> <input type="text" size="30" id="lastname" name="lastname" placeholder="Last Name..."><br/>
         <label>Email:</label> <input type="text" size="30" id="email" name="email" placeholder="Email..."><br/>
@@ -13,6 +13,21 @@
         <label>Confirm Password:</label> <input type="password" minlength=6 size="30" id="mpassword" name="mpassword" placeholder="Confirm Password..."><br/>
         <br/><button type="submit" id="login" style="margin-left: 100px;">Register</button>
     </form>
-</div>
+    <% if (error){ %>
+        <% if (error == "missing") { %>
+            Incomplete Form
+            <% } %>
+        <% if (error == "mismatch") { %>
+            Passwords Do Not Match
+            <% } %>
+        <% if (error == "pass") { %>
+            Check email for verification code
+            <% } %>
+        <% if (error == "exists") { %>
+            Username or Email in use
+            <% } %>
+        <% } %>
 
-<% include partials/footer %>
+</div>
+            
+    <% include partials/footer %>

@@ -16,7 +16,7 @@ var expressValidator = require('express-validator');
 // require('./models/config');
 const url = require('url');
 var mysql = require('mysql');
-require('./controllers/functions');
+const functions = require('./controllers/functions.js');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -142,8 +142,21 @@ app.get('/profile', function(req, res){
 
 //Registration
 app.get('/registration', function(req, res){
-    res.render('registration');
+    error = "";
+    res.render('registration', {error: error});
 });
+
+app.post('/register_me', function(req, res){
+    // console.log(req.body);
+    check = functions.registration_input(req.body);
+    console.log(check);
+
+    if (check === 'missing' || check == 'mismatch'){
+        res.redirect('./registration', {error: check});
+    }else{
+        res.redirect('./registration', {error: check});
+    }
+})
 
 //research
 app.get('/search', function(req, res){
@@ -200,10 +213,12 @@ app.get('/search', function(req, res){
             matches = "";
             if (fail == "False"){
                 
-                matches = search_and_recover(data);
+                matches = functions.search_and_recover(data);
+                // console.log(data);
             }
             // errors = errors.split(",");
             console.log(fail);
+            console.log(matches);
             // console.log(age);
             // console.log(rating);
             // console.log(dist);
