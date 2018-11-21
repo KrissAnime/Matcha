@@ -9,13 +9,13 @@ function escapeHtmlReverse(unsafe) {
     .replace(/&#039;/g, "'");
 }
 
-var express = require('express');
-var path = require('path');
-var bodyParser = require('body-parser');
-var expressValidator = require('express-validator');
-// require('./models/config');
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
+const session = require('express-session');
 const url = require('url');
-var mysql = require('mysql');
+const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 
 var con = mysql.createConnection({
@@ -24,6 +24,8 @@ var con = mysql.createConnection({
     user: "root",
     password: "Asuka2016"
 });
+
+var monitor;
 
 // Init App
 var app = express();
@@ -35,6 +37,13 @@ app.set('view engine', 'ejs');
 // Body Parser Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+//Register Session With Secred ID
+app.use(session({
+    secret: '3tern@1-BIack-Ro5es',
+    resave: false,
+    saveUninitialized: false
+}));
 
 // Set Static Path
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,79 +74,139 @@ app.use(expressValidator({
 
 // console.log("Log 1");
 app.get('/', function(req, res){
-    sql = "SELECT * FROM `matcha`.`profiles`";
-    con.query(sql, function (err, result) {
-        if (err){
-            // console.log(err);
-        }
-        else{
-            // Home Page
-            res.render('index', {
-                users: result
-            });
-        }
-    });
+    monitor = req.session;
+    if (monitor.logged){
+        sql = "SELECT * FROM `matcha`.`profiles`";
+        con.query(sql, function (err, result) {
+            if (err){
+                // console.log(err);
+            }
+            else{
+                // Home Page
+                res.render('index', {
+                    users: result,
+                    session: monitor.logged
+                });
+            }
+        });
+    } else {
+        res.redirect('/login');
+    }
 });
 
 app.get('/profiles/:unique_key', function(req, res, next) {
-    sql = "SELECT * FROM `matcha`.`profiles` WHERE `unique_key` = '";
-    sql += req.params.unique_key;
-    sql += "'";
-    // console.log('before render');
-    con.query(sql, function (err, result) {
-        if (err){
-            console.log(err);
-        }
-        else {
-            result[0].bio = escapeHtmlReverse(result[0].bio);
-            console.log(result);
-            sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = '";
-            sql += req.params.unique_key;
-            sql += "'";
-            con.query(sql, function (err, result2) {
-                if (err){
-                    console.log(err);
-                }
-                else{
-                    // console.log(result2);
-                    res.render('profiles', {users: result, images: result2});
-                }
-            })
-            // next();
-            // console.log("after render");
-        }
-    })
+    monitor = req.session;
+    if (monitor.logged){
+        sql = "SELECT * FROM `matcha`.`profiles` WHERE `unique_key` = '";
+        sql += req.params.unique_key;
+        sql += "'";
+        // console.log('before render');
+        con.query(sql, function (err, result) {
+            if (err){
+                console.log(err);
+            }
+            else {
+                result[0].bio = escapeHtmlReverse(result[0].bio);
+                console.log(result);
+                sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = '";
+                sql += req.params.unique_key;
+                sql += "'";
+                con.query(sql, function (err, result2) {
+                    if (err){
+                        console.log(err);
+                    }
+                    else{
+                        // console.log(result2);
+                        res.render('profiles',
+                        {   users: result,
+                            images: result2,
+                            session: monitor.logged
+                        });
+                    }
+                })
+                // next();
+                // console.log("after render");
+            }
+        })
+    }
+    res.redirect('/login');
 });
 
 // Profiles Page
 app.get('/profiles', function(req, res){
-    sql = "SELECT * FROM `matcha`.`profiles`";
-    con.query(sql, function (err, result) {
-        if (err){
-            // console.log(err);
-        }
-        else{
-            // Home Page
-            res.render('index', {
-                users: result
-            });
-        }
-    });
+    monitor = req.session;
+    if (monitor.logged){
+        sql = "SELECT * FROM `matcha`.`profiles`";
+        con.query(sql, function (err, result) {
+            if (err){
+                // console.log(err);
+            }
+            else{
+                // Home Page
+                res.render('index', {
+                    users: result,
+                    session: monitor.logged
+                });
+            }
+        });
+    }
+    res.redirect('/login');
 });
 
 // Notifications Page
 app.get('/notifications', function(req, res){
-    res.render('profile');
+    monitor = req.session;
+    if (monitor.logged){
+        res.render('profile');
+    }
+    res.redirect('/login');
 });
 
 // Messages Page
 app.get('/messages', function(req, res){
-    res.render('messages');
+    monitor = req.session;
+    if (monitor.logged){
+        res.render('messages');
+    }
+    res.redirect('/login');
 });
 
 // Profile Page
 app.get('/profile', function(req, res){
     res.redirect('/');
+});
+
+//Logout
+app.get('/logout', function(req, res){
+    req.session.destroy(function(err){
+        if (err){
+            console.log(err);
+        }
+        res.redirect('/login');
+    })
+})
+
+//Login Page
+app.get('/login', function(req, res){
+    err = "";
+    res.render('login', {result: err});
+});
+
+app.post('/login', function(req, res){
+    data = {
+        username: req.body.username,
+        password: req.body.password
+    }
+    functions.log_me_in(data, function(err, resp){
+        monitor = req.session;
+        if (err){
+            res.render('./login', {result: err});
+        } else {
+            monitor.logged = data.username;
+            console.log(monitor.logged + " Logged In");
+            res.redirect('/');
+        }
+    })
 });
 
 //Registration
@@ -146,99 +215,130 @@ app.get('/registration', function(req, res){
     res.render('registration', {error: error});
 });
 
-app.post('/register_me', function(req, res){
+app.post('/registration', function(req, res){
     // console.log(req.body);
-    check = functions.registration_input(req.body);
-    console.log(check);
-
-    if (check === 'missing' || check == 'mismatch'){
-        res.redirect('./registration', {error: check});
-    }else{
-        res.redirect('./registration', {error: check});
+    var register = {
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        username: req.body.username,
+        password: req.body.password,
+        mpassword: req.body.mpassword,
     }
+    functions.registration_input(register, function(err, resp){
+        if (err){
+            // console.log(err);
+            res.render('./registration', {error: err});
+        } else {
+            // console.log(resp);
+            res.render('./registration', {error: resp});
+        }
+    });
+})
+
+//Verification Page
+app.get('/verification', function(req, res){
+    data = "";
+    res.render('verification');
+})
+
+app.post('/verification', function(req, res){
+    var data = "missing";
+    if (!req.body.email || !req.body.code){
+        res.render('verification', {data: data});
+    }
+    else{
+        var data = {
+            email: req.body.email,
+            code: req.body.code
+        }
+        functions.verification_code(data, function(err, resp){
+            // console.log(err);
+            // console.log(resp);
+            if (err){
+                res.render('verification', {data: err});
+            } else {
+                res.render('verification', {data: resp});
+            }
+        });
+        // console.log(data);
+    }
+    // if (functions.verification_code())
 })
 
 //research
 app.get('/search', function(req, res){
-    sql = "SELECT * FROM `matcha`.`tags`";
-    con.query(sql, function (err, result){
-        if (err){
-            console.log(err);
-        }
-        else{
-            var age = req.query.age_select;
-            var rating = req.query.rating_select;
-            var dist = req.query.distance_select;
-            var tag_1 = req.query.tag1_select;
-            var tag_2 = req.query.tag2_select;
-            var tag_3 = req.query.tag3_select;
-            var errors = 6;
-            // console.log(age)
-            var data = {
-                age: age,
-                rating: rating,
-                distance: dist,
-                tag_1: tag_1,
-                tag_2: tag_2,
-                tag_3: tag_3
-            };
-            if (!age){
-                errors--;
-                data.age = 1;
+    monitor = req.session;
+    if (monitor.logged){
+        sql = "SELECT * FROM `matcha`.`tags`";
+        con.query(sql, function (err, result){
+            if (err){
+                console.log(err);
             }
-            if (!rating){
-                errors--;
-                data.rating = 1;
+            else{
+                var age = req.query.age_select;
+                var rating = req.query.rating_select;
+                var dist = req.query.distance_select;
+                var tag_1 = req.query.tag1_select;
+                var tag_2 = req.query.tag2_select;
+                var tag_3 = req.query.tag3_select;
+                var errors = 6;
+                // console.log(age)
+                var data = {
+                    age: age,
+                    rating: rating,
+                    distance: dist,
+                    tag_1: tag_1,
+                    tag_2: tag_2,
+                    tag_3: tag_3
+                };
+                if (!age){
+                    errors--;
+                    data.age = 1;
+                }
+                if (!rating){
+                    errors--;
+                    data.rating = 1;
+                }
+                if (!dist){
+                    errors--;
+                    data.distance = 1;
+                }
+                if (!tag_1){
+                    errors--;
+                    data.tag_1 = 1;
+                }
+                if (!tag_2){
+                    errors--;
+                    data.tag_2 = 1;
+                }
+                if (!tag_3){
+                    errors--;
+                    data.tag_3 = 1;
+                }
+                var fail = "False";
+                if (!errors){
+                    fail = "True";
+                }
+                matches = "";
+                if (fail == "False"){
+                    functions.search_and_recover(data);
+                }
+                res.render('search', {tags: result,
+                    fail: fail,
+                    matches: matches,
+                    session: monitor.logged
+                });
             }
-            if (!dist){
-                errors--;
-                data.distance = 1;
-            }
-            if (!tag_1){
-                errors--;
-                data.tag_1 = 1;
-            }
-            if (!tag_2){
-                errors--;
-                data.tag_2 = 1;
-            }
-            if (!tag_3){
-                errors--;
-                data.tag_3 = 1;
-            }
-            var fail = "False";
-            if (!errors){
-                fail = "True";
-            }
-            matches = "";
-            if (fail == "False"){
-                
-                matches = functions.search_and_recover(data);
-                // console.log(data);
-            }
-            // errors = errors.split(",");
-            console.log(fail);
-            console.log(matches);
-            // console.log(age);
-            // console.log(rating);
-            // console.log(dist);
-            // console.log(tag_1);
-            // console.log(tag_2);
-            // console.log(tag_3);
-            res.render('search', {tags: result, fail: fail, matches: matches});
-        }
-    })
+        })
+    }
+    res.redirect('/login');
 });
 
 //Manages all the searching
 app.post('/searcher', function(req, res){
     console.log(req.body.age_select);
 })
-
-//Login Page
-app.get('/login', function(req, res){
-    res.render('login');
-});
 
 //Starts the system server
 app.listen(3000, function(){

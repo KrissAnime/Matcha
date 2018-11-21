@@ -1,0 +1,23 @@
+<% include partials/head %>
+<header>
+    <% include partials/header %>
+</header>
+
+    <div id="verification_box">
+        <form action="" method="POST">
+            <label style="color: white">Email:</label> <input type="text" size="30" id="email" name="email" placeholder="Email..."><br/>
+            <label style="color: white">Code:</label> <input type="text" size="30" id="code" name="code" placeholder="Verification Code..."><br/>
+            <br/><button type="submit" id="confirm_code" style="margin: auto">Confirm</button>
+        </form>
+        <% if (data){
+            if (data == "missing"){ %>
+                <h6>Both fields are compulsory</h6>
+            <% } else if (data == "fail") { %>
+                <h6>Invalid Details</h6>
+            <% } else if (data == "pass") {%>
+                <h6>You may now <a href="login">Login</a></h6>
+                <% }
+            } %>
+    </div>
+
+<% include partials/footer %>
