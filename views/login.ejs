@@ -1,6 +1,7 @@
 <% include partials/head %>
 <header>
-    <% include partials/header %>
+        <%- include('partials/header', {session: session}); %>
+
 </header>
 
 <div id="login_class">
@@ -11,9 +12,9 @@
         <h6>New Account? <a href="registration">Register</a> Here!</h6>
         <!-- <a href="forgot_password.php">Forgot Password?</a> -->
     </form>
-    <% if (err){
-        if (err == "invalid"){ %>
-            <h6>Invalid Login Details</h6>
+    <% if (result){
+        if (result == "invalid"){ %>
+            <h6 style="text-align: center">Invalid Login Details</h6>
         <% }
     } %>
 </div>

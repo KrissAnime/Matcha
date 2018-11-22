@@ -5,3 +5,11 @@
     margin: auto;
     padding: 8px;
 }
+
+#unread_row{
+    color: lightblue;
+}
+
+#read_row{
+    color: grey;
+}

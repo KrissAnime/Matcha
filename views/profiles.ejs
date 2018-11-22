@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-    <% include partials/header %>
+    <%- include('partials/header', {session: session}); %>
 </header>
 
 <div class="user_profiles">
@@ -9,55 +9,141 @@
             <div class="" ></div>
         </div>
         <div id="user_bio_details">
-            <table style="padding: 1px; width:100%; font-size: 14px">
-                <tr><%= user.user_name %></tr>
-                <tr>
-                    <td>Name: </td>
-                    <td><%= user.first_name %></td>
-                </tr>
-                <tr>
-                    <td>Surname: </td>
-                    <td><%= user.last_name %></td>
-                </tr>
-                <tr>
-                    <td>Age: </td>
-                    <td><%= user.age %></td>
-                </tr>
-                <tr>
-                    <td>Gender: </td>
-                    <% if (user.gender == 1){ %>
-                        <td>Female</td>
-                        <% }else{ %>
-                            <td>Male</td>
-                            <% } %>
-                        </tr>
-                <tr>
-                    <% if(user.sexual_pref == 0) {%>
-                        <td>Straight</td>
-                    <% }else if (user.sexual_pref == 1) { %>
-                        <td>Bisexual</td>
-                    <% }else if (user.sexual_pref == 2) { %>
-                        <td>Gay</td>
-                    <% }else { %>
-                        <td>Lesbian</td>
+            <div id="fame_rating_index" style="width: 100%">
+                <% for (var i = 0; i < user.fame_rating; i++){ %>
+                    <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
                     <% } %>
-                    <td></td>
-                </tr>    
-            </table>
-                    
-                </div>
-                <div id="user_other_details">
-                    <div id="user_other_about_me">
-                        <p id="user_other_about_me_text"><%= user.bio %></p>
-                    </div>
-                </div>
-                <% images.forEach(function(image){ %>
-                    <div id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
-                    <div id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
-                    <div id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
-                    <div id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
-                    <% }) %>
-                    <% }) %>
-                </div>
-                
-                <% include partials/footer %>
+                    <% while (i < 5){ %>
+                        <i class="far fa-star" stule="width: 12px;"></i>
+                        <% i++ %>
+                        <% } %>
+                    </div><br>
+                    <table style="padding: 1px; width:100%; font-size: 14px">
+                        <tr><%= user.user_name %></tr>
+                        <tr>
+                            <td>Name: </td>
+                            <td><%= user.first_name %></td>
+                        </tr>
+                        <tr>
+                            <td>Surname: </td>
+                            <td><%= user.last_name %></td>
+                        </tr>
+                        <tr>
+                            <td>Age: </td>
+                            <td><%= user.age %></td>
+                        </tr>
+                        <tr>
+                            <td>Gender: </td>
+                            <% if (user.gender == 1){ %>
+                                <td>Female</td>
+                                <% }else{ %>
+                                    <td>Male</td>
+                                    <% } %>
+                                </tr>
+                                <tr>
+                                    <% if(user.sexual_pref == 0) {%>
+                                        <td>Straight</td>
+                                        <% }else if (user.sexual_pref == 1) { %>
+                                            <td>Bisexual</td>
+                                            <% }else if (user.sexual_pref == 2) { %>
+                                                <td>Gay</td>
+                                                <% }else { %>
+                                                    <td>Lesbian</td>
+                                                    <% } %>
+                                                    <td></td>
+                                                </tr>    
+                                            </table>
+                                            
+                                        </div>
+                                        <div id="user_other_details">
+                                            <div id="container" style="padding: 10px; color: white">
+                                                <p id="user_other_about_me_text"><%= user.bio %></p>
+                                            </div>
+                                            <div class="btn-group" style="margin: auto; margin-left: 43%">
+                                                <button type="button" class="btn btn-success">Like</button>
+                                                <button type="button" class="btn btn-danger">Block</button>
+                                            </div>
+                                            
+                                            <div id="panel-warning" style="margin-left: 44%; color: yellow">
+                                                <% if (rating) {
+                                                    for (var i = 0; i < user.fame_rating; i++){ %>
+                                                        <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
+                                                        <% } 
+                                                        while (i < 5){ %>
+                                                            <i class="far fa-star" stule="width: 12px;"></i>
+                                                            <% i++;
+                                                        } 
+                                                    } else { %>
+                                                        <i id="profile_heart1" class="far fa-star" stule="width: 12px;"></i>
+                                                        <i id="profile_heart2" class="far fa-star" stule="width: 12px;"></i>
+                                                        <i id="profile_heart3" class="far fa-star" stule="width: 12px;"></i>
+                                                        <i id="profile_heart4" class="far fa-star" stule="width: 12px;"></i>
+                                                        <i id="profile_heart5" class="far fa-star" stule="width: 12px;"></i>
+                                                        <% } %>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <% images.forEach(function(image){ %>
+                                                    <div id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
+                                                    <div id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
+                                                    <div id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
+                                                    <div id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
+                                                    <% }) %>
+                                                    <% }) %>
+                                                </div>
+                                                
+                                                <script>
+                                                    
+                                                    $('#profile_heart1').hover(function(){
+                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
+                                                    }, function(){
+                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
+                                                    });
+                                                    
+                                                    $('#profile_heart2').hover(function(){
+                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
+                                                    }, function(){
+                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
+                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                    });
+                                                    
+                                                    $('#profile_heart3').hover(function(){
+                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
+                                                    }, function(){
+                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
+                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                    });
+                                                    
+                                                    $('#profile_heart4').hover(function(){
+                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart3').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
+                                                    }, function(){
+                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart3').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
+                                                    });
+                                                    
+                                                    $('#profile_heart5').hover(function(){
+                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart3').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $('#profile_heart4').removeClass("far fa-star").addClass("fas fa-star");
+                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
+                                                    }, function(){
+                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart3').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $('#profile_heart4').removeClass("fas fa-star").addClass("far fa-star");                                                        
+                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
+                                                    });
+                                                    
+                                                    
+                                                </script>
+                                                <% include partials/footer %>

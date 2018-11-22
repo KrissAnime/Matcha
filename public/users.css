@@ -180,3 +180,12 @@
     font-size: 16px;
 
 }
+
+#fame_rating_index_2{
+    margin: auto;
+    font-weight: bold;
+    width: 20%;
+    height: 20px;
+    text-align: center;
+    background-color: gold;
+}

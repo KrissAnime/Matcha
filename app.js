@@ -12,9 +12,7 @@ function escapeHtmlReverse(unsafe) {
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const expressValidator = require('express-validator');
 const session = require('express-session');
-const url = require('url');
 const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 
@@ -41,8 +39,8 @@ app.use(bodyParser.urlencoded({extended: false}));
 //Register Session With Secred ID
 app.use(session({
     secret: '3tern@1-BIack-Ro5es',
-    resave: false,
-    saveUninitialized: false
+    saveUninitialized: true,
+    resave: true,
 }));
 
 // Set Static Path
@@ -54,49 +52,31 @@ app.use(function(req, res, next){
     next();
 })
 
-// Express Validator Middleware
-app.use(expressValidator({
-    errorFormatter: function(param, msg, value) {
-        var namespace = param.split('.'),
-        root = namespace.shift(),
-        formParam = root;
-        
-        while (namespace.length){
-            form += '[' + namespace.shift() + ']';
-        }
-        return {
-            param   : formParam,
-            msg     : msg,
-            value   : value
-        }
-    }
-}));
-
 // console.log("Log 1");
 app.get('/', function(req, res){
-    monitor = req.session;
-    if (monitor.logged){
-        sql = "SELECT * FROM `matcha`.`profiles`";
+    if (req.session.username){
+        sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` != '" + req.session.username + "'";
         con.query(sql, function (err, result) {
             if (err){
                 // console.log(err);
             }
             else{
                 // Home Page
+                // console.log(result);
                 res.render('index', {
                     users: result,
-                    session: monitor.logged
+                    session: req.session.username
                 });
             }
         });
     } else {
         res.redirect('/login');
     }
+    
 });
 
 app.get('/profiles/:unique_key', function(req, res, next) {
-    monitor = req.session;
-    if (monitor.logged){
+    if (req.session.username){
         sql = "SELECT * FROM `matcha`.`profiles` WHERE `unique_key` = '";
         sql += req.params.unique_key;
         sql += "'";
@@ -107,7 +87,7 @@ app.get('/profiles/:unique_key', function(req, res, next) {
             }
             else {
                 result[0].bio = escapeHtmlReverse(result[0].bio);
-                console.log(result);
+                // console.log(result);
                 sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = '";
                 sql += req.params.unique_key;
                 sql += "'";
@@ -117,25 +97,36 @@ app.get('/profiles/:unique_key', function(req, res, next) {
                     }
                     else{
                         // console.log(result2);
-                        res.render('profiles',
-                        {   users: result,
-                            images: result2,
-                            session: monitor.logged
-                        });
+                        sql = "SELECT `rating` FROM `matcha`.`likes` WHERE `instigator` = '" + req.session.username + "'";
+                        con.query(sql, function(err2, result3){
+                            if (err2){
+                                console.log(err2);
+                            } else {
+                                // console.log(result3);
+                                var rate = result3.rating;
+                                res.render('profiles',
+                                {
+                                    users: result,
+                                    images: result2,
+                                    session: req.session.username,
+                                    rating: rate
+                                });
+                            }
+                        })
                     }
                 })
                 // next();
                 // console.log("after render");
             }
         })
+    } else {
+        res.redirect('/login');
     }
-    res.redirect('/login');
 });
 
 // Profiles Page
 app.get('/profiles', function(req, res){
-    monitor = req.session;
-    if (monitor.logged){
+    if (req.session.username){
         sql = "SELECT * FROM `matcha`.`profiles`";
         con.query(sql, function (err, result) {
             if (err){
@@ -145,35 +136,63 @@ app.get('/profiles', function(req, res){
                 // Home Page
                 res.render('index', {
                     users: result,
-                    session: monitor.logged
+                    session: req.session.username
                 });
             }
         });
+    } else {
+        res.redirect('/login');
     }
-    res.redirect('/login');
 });
 
 // Notifications Page
 app.get('/notifications', function(req, res){
-    monitor = req.session;
-    if (monitor.logged){
-        res.render('profile');
+    if (req.session.username){
+        sql = "SELECT * FROM `matcha`.`notifications` WHERE `user_name` = '" + req.session.username + "'";
+        con.query(sql, function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                // console.log(result[0]);
+                // console.log(result);
+                sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles`";
+                con.query(sql, function(err2, result2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        var check = result[0];
+                        res.render('notifications',
+                        {
+                            session: req.session.username,
+                            result: result,
+                            users: result2,
+                            check: check
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        res.redirect('/login');
     }
-    res.redirect('/login');
 });
 
 // Messages Page
 app.get('/messages', function(req, res){
-    monitor = req.session;
-    if (monitor.logged){
-        res.render('messages');
+    if (req.session.username){
+        res.render('messages', {session: req.session.username});
+    } else {
+        res.redirect('/login');
     }
-    res.redirect('/login');
 });
 
 // Profile Page
 app.get('/profile', function(req, res){
-    res.redirect('/');
+    if (req.session.username){
+        res.render('profile', {session: req.session.username});        
+    } else {
+        res.redirect('/login');
+    }
 });
 
 //Logout
@@ -189,7 +208,7 @@ app.get('/logout', function(req, res){
 //Login Page
 app.get('/login', function(req, res){
     err = "";
-    res.render('login', {result: err});
+    res.render('login', {result: err, session: err});
 });
 
 app.post('/login', function(req, res){
@@ -198,12 +217,15 @@ app.post('/login', function(req, res){
         password: req.body.password
     }
     functions.log_me_in(data, function(err, resp){
-        monitor = req.session;
-        if (err){
-            res.render('./login', {result: err});
+        // monitor = req.session;
+        var empty = "";
+        var error = "invalid";
+        if (resp == '0'){
+            res.render('./login', {result: error, session: empty});
         } else {
-            monitor.logged = data.username;
-            console.log(monitor.logged + " Logged In");
+            req.session.username = req.body.username;
+            // monitor.logged = data.username;
+            console.log(req.session.username + " Logged In");
             res.redirect('/');
         }
     })
@@ -212,7 +234,7 @@ app.post('/login', function(req, res){
 //Registration
 app.get('/registration', function(req, res){
     error = "";
-    res.render('registration', {error: error});
+    res.render('registration', {error: error, session: error});
 });
 
 app.post('/registration', function(req, res){
@@ -228,10 +250,10 @@ app.post('/registration', function(req, res){
     functions.registration_input(register, function(err, resp){
         if (err){
             // console.log(err);
-            res.render('./registration', {error: err});
+            res.render('./registration', {error: err, session: req.session.username});
         } else {
             // console.log(resp);
-            res.render('./registration', {error: resp});
+            res.render('./registration', {error: resp, session: req.session.username});
         }
     });
 })
@@ -244,8 +266,9 @@ app.get('/verification', function(req, res){
 
 app.post('/verification', function(req, res){
     var data = "missing";
+    empty = "";
     if (!req.body.email || !req.body.code){
-        res.render('verification', {data: data});
+        res.render('verification', {data: data, session: empty});
     }
     else{
         var data = {
@@ -256,9 +279,9 @@ app.post('/verification', function(req, res){
             // console.log(err);
             // console.log(resp);
             if (err){
-                res.render('verification', {data: err});
+                res.render('verification', {data: err, session: empty});
             } else {
-                res.render('verification', {data: resp});
+                res.render('verification', {data: resp, session: empty});
             }
         });
         // console.log(data);
@@ -327,7 +350,7 @@ app.get('/search', function(req, res){
                 res.render('search', {tags: result,
                     fail: fail,
                     matches: matches,
-                    session: monitor.logged
+                    session: req.session.username
                 });
             }
         })
@@ -345,6 +368,17 @@ app.listen(3000, function(){
     console.log('Server started on port 3000...');
 });
 
+//Beginning of Backend Ajax pages here
+
+//Rating a user
+app.post('/like_me', function(req, res){
+    console.log(data.rate);
+    console.log(rate);
+})
+
+//For when users attempt an invalid or broken url
 app.use(function (req, res){
     res.render('error');
 })
+
+

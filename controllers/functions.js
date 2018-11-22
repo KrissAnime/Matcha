@@ -30,14 +30,14 @@ module.exports.log_me_in = function(data, callback){
         if (err){
             console.log(err);
         } else {
-            var verified = 0;
+            var verified = '0';
             var pass = encryption(data.password);
             result.forEach(element => {
                 if (element.user_name == data.username && element.password == pass){
-                    callback(null, "login");
+                    verified = '1';
                 }
-            })
-            callback("invalid", null);
+            });
+            callback(null, verified);
         }
     });
 }

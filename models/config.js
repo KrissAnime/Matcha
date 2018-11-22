@@ -208,7 +208,7 @@ sql += " `email` VARCHAR(50) NOT NULL ,";
 sql += " `password` VARCHAR(255) NOT NULL,";
 sql += " `verified` INT (1),";
 sql += " `profile` VARCHAR(60),";
-sql += " `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+sql += " `date` DATETIME DEFAULT CURRENT_TIMESTAMP)"
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -271,7 +271,7 @@ con.query(sql, function (err, result) {
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`likes` ";
 sql += "(`instigator` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
-sql += " `choice` VARCHAR(6), `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+sql += " `choice` VARCHAR(6), `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP, `rating` INT(1)) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -283,7 +283,7 @@ con.query(sql, function (err, result) {
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`messaging` ";
 sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
-sql += " `message` VARCHAR(1000), `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+sql += " `message` VARCHAR(1000), `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -295,7 +295,7 @@ con.query(sql, function (err, result) {
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`block` ";
 sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
-sql += " `status` BOOLEAN, `time_log` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
+sql += " `status` BOOLEAN, `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -328,6 +328,18 @@ con.query(sql, function (err, result) {
   }
 });
 
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`notifications` ";
+sql += "(`notice_id` INT (9) AUTO_INCREMENT PRIMARY KEY, `user_name` VARCHAR(50) NOT NULL, `action` VARCHAR(30) NOT NULL, `instigator` VARCHAR(50) NOT NULL, ";
+sql += " `notify` VARCHAR(300) NOT NULL, `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP, `logged` INT(1)) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Notification Table Created");
+  }
+});
+
 function escapeHtml(unsafe) {
   return unsafe
   .replace(/&/g, "&amp;")
@@ -336,7 +348,7 @@ function escapeHtml(unsafe) {
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 }
-/*
+
 var x = 0;
 for (const item of users){
   var pass = encryption(item.password);
@@ -353,7 +365,7 @@ for (const item of users){
   var interests = item.interests;
   var age = item.age;
   var unique_key = encryption(user_name);
-  const dir = "../public/extra/profiles/";
+  const dir = "./public/extra/profiles/";
   
   // console.log("Before new loop");
   var temp_dir = dir + user_name;
@@ -385,9 +397,9 @@ for (const item of users){
     }    
   });
   sql = "INSERT INTO `matcha`.`users` ";
-  sql += "(`user_id`, `user_name`, `email`, `password`, `verified`, `profile`, `date`)";
+  sql += "(`user_id`, `user_name`, `email`, `password`, `verified`, `profile`)";
   sql += " VALUES ('" + (x + 1) +  "', '" + user_name + "', '" + email + "', '";
-  sql += pass + "', '1" + "', '" + profile + "', CURRENT_TIMESTAMP)";
+  sql += pass + "', '1" + "', '" + profile + "')";
   con.query(sql, function (err, result) {
     if (err){
       console.log(err);
@@ -412,4 +424,4 @@ for (const item of users){
     }
   });
   x++;
-}*/
+}

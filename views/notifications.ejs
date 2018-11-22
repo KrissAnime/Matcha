@@ -1,9 +1,43 @@
 <% include partials/head %>
 <header>
-    <% include partials/header %>
+        <%- include('partials/header', {session: session}); %>
 </header>
-
-
-
-
-<% include partials/footer %>
+<table class="table">
+        <% if (check){
+                result.forEach(function(notice){
+                        if (notice.logged == 0){
+                                if (notice.action == "Like"){ %>
+                                        <tr id="unread_row">
+                                                <td><%= notice.notify %> 
+                                                        <% users.forEach(function(user){
+                                                                if (user.user_name == notice.instigator){ %>
+                                                                        <a href="profiles/<%= user.unique_key %>"><%= notice.instigator %></a>
+                                                                <% }}) %> on <%= notice.time_log %></td>
+                                        </tr>
+                                <% }
+                                if (notice.action == "Message"){%>
+                                        <tr id="unread_row">
+                                                        <td><%= notice.notify %> 
+                                                                <% users.forEach(function(user){
+                                                                        if (user.user_name == notice.instigator){ %>
+                                                                                <a href="messages/<%= user.unique_key %>"><%= notice.instigator %></a>
+                                                                        <% }}) %> on <%= notice.time_log %></td>
+                                                </tr>
+                                <% } 
+                                if (notice.action == "Block"){%>
+                                        <tr id="unread_row">
+                                                <td><%= notice.notify %> <%= notice.instigator %> on <%= notice.time_log %></td>
+                                        </tr>
+                                        <% } %>
+                                <% } else { %>
+                                        <tr id="read_row">
+                                                <td><%= notice.notify %> <%= notice.instigator %> on <%= notice.time_log %></td>
+                                        </tr>
+                                        <% } %>
+                                        <% })} else { %>
+                                                <td>You Have No Notifications!</td>
+                                                <% } %>
+                                
+                        </table>
+                        
+                        <% include partials/footer %>

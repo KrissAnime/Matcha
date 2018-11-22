@@ -12,13 +12,13 @@
 <div class="w3-bar w3-black">
     <a href="/" class="w3-bar-item w3-button" >Home</a>
     <a href="search" class="w3-bar-item w3-button">Search</a>
-    <% if (session){ %>
-        <div class="w3-right">
+        <% if (session){ %>
+            <div class="w3-right">
             <a href="logout" class="w3-bar-item w3-button">Logout</a>
         </div>
-    <% } else { %>
+        <% } else { %>
         <div class="w3-right">
             <a href="login" class="w3-bar-item w3-button">Login</a>
         </div>
-    <% } %>
+        <% } %>
 </div>
