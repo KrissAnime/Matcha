@@ -1,9 +1,30 @@
 <% include partials/head %>
 <header>
-        <%- include('partials/header', {session: session}); %>
+    <%- include('partials/header', {session: session}); %>
 </header>
 
-
-
-
-<% include partials/footer %>
+<table class="w3-table w3-bordered" style="color: white">
+    <% if (messages){
+        messages.forEach(function(message){ %>
+            <tr>
+                <td><% users.forEach(function(user){
+                    if (user.unique_key == message.sender){ %>
+                        <a href="messaging/<%= user.unique_key %>" style="color: white"><div>
+                        <%= user.user_name %></div><mess><%= message.message %></mess></a></td>
+                        <% }
+                    }) %>
+                </tr>
+                <%  });
+            } else { %>
+                <tr>
+                    <td>You have no messages! Go make some friends!</td>
+                </tr>
+                <% } %>
+            </table>
+            <script type="text/javascript">
+                $('mess').each(function(){
+                    this.textContent = this.textContent.replace($(this).text(), $(this).text().substr(0, 13) + "...");
+                });
+            </script>
+            
+            <% include partials/footer %>

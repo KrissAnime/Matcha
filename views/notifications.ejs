@@ -2,7 +2,7 @@
 <header>
         <%- include('partials/header', {session: session}); %>
 </header>
-<table class="table">
+<table class="w3-table w3-bordered" style="color: white">
         <% if (check){
                 result.forEach(function(notice){
                         if (notice.logged == 0){
@@ -15,8 +15,8 @@
                                                                 <% }}) %> on <%= notice.time_log %></td>
                                         </tr>
                                 <% }
-                                if (notice.action == "Message"){%>
-                                        <tr id="unread_row">
+                                if (notice.action == "Message" && notice.logged == 0){%>
+                                        <tr id="message">
                                                         <td><%= notice.notify %> 
                                                                 <% users.forEach(function(user){
                                                                         if (user.user_name == notice.instigator){ %>
@@ -25,7 +25,7 @@
                                                 </tr>
                                 <% } 
                                 if (notice.action == "Block"){%>
-                                        <tr id="unread_row">
+                                        <tr id="read_row">
                                                 <td><%= notice.notify %> <%= notice.instigator %> on <%= notice.time_log %></td>
                                         </tr>
                                         <% } %>

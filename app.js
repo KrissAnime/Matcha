@@ -15,6 +15,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
+const socket = require('socket.io');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -52,7 +53,23 @@ app.use(function(req, res, next){
     next();
 })
 
-// console.log("Log 1");
+//Starts the system server
+var server = app.listen(3000, function(){
+    console.log('Server started on port 3000...');
+});
+
+//Secket Setup
+var io = socket(server);
+
+io.on('connection', function(socket){
+    // console.log('Made socket connection');
+    
+    socket.on('chat', function(data){
+        io.sockets.emit('chat', data);
+    });
+});
+
+// Home Page
 app.get('/', function(req, res){
     if (req.session.username){
         sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` != '" + req.session.username + "'";
@@ -61,7 +78,6 @@ app.get('/', function(req, res){
                 // console.log(err);
             }
             else{
-                // Home Page
                 // console.log(result);
                 res.render('index', {
                     users: result,
@@ -115,8 +131,6 @@ app.get('/profiles/:unique_key', function(req, res, next) {
                         })
                     }
                 })
-                // next();
-                // console.log("after render");
             }
         })
     } else {
@@ -134,7 +148,7 @@ app.get('/profiles', function(req, res){
             }
             else{
                 // Home Page
-                res.render('index', {
+                res.render('profiles', {
                     users: result,
                     session: req.session.username
                 });
@@ -180,11 +194,73 @@ app.get('/notifications', function(req, res){
 // Messages Page
 app.get('/messages', function(req, res){
     if (req.session.username){
-        res.render('messages', {session: req.session.username});
+        sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = '" + req.session.username + "'";
+        con.query(sql, function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                var key = result[0].unique_key;
+                sql = "SELECT * FROM `matcha`.`messaging` WHERE `receiver` = '" + key + "'";
+                con.query(sql, function(err2, result2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        // console.log(result2);
+                        sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles`";
+                        con.query(sql, function(err3, result3){
+                            if (err3) {
+                                console.log(err3);
+                            } else {
+                                res.render('messages',
+                                {
+                                    session: req.session.username,
+                                    messages: result2,
+                                    users: result3
+                                });
+                            }
+                        })
+                    }
+                });
+            }
+        });
     } else {
         res.redirect('/login');
     }
 });
+
+app.get('/messaging/:unique_key', function(req, res){
+    if (req.session.username){
+        sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles` WHERE `unique_key` = '" + req.params.unique_key + "' OR `user_name` = '" + req.session.username + "'";
+        con.query(sql, function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0].user_name == req.session.username){
+                    var chat_mate = result[1].user_name;
+                    var my_key = result[0].unique_key;
+                } else {
+                    var chat_mate = result[0].user_name;
+                    var my_key = result[1].unique_key;
+                }
+                sql = "SELECT * FROM `matcha`.`messaging` WHERE `receiver` = '" + my_key + "' AND `sender` = '" + req.params.unique_key + "'";
+                con.query(sql, function(err2, result2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        res.render('messaging',
+                        {
+                            session: req.session.username,
+                            chat_mate: chat_mate,
+                            messages: result2
+                        });
+                    }
+                });
+            }
+        })
+    } else {
+        res.redirect('/login');
+    };
+})
 
 // Profile Page
 app.get('/profile', function(req, res){
@@ -362,11 +438,6 @@ app.get('/search', function(req, res){
 app.post('/searcher', function(req, res){
     console.log(req.body.age_select);
 })
-
-//Starts the system server
-app.listen(3000, function(){
-    console.log('Server started on port 3000...');
-});
 
 //Beginning of Backend Ajax pages here
 

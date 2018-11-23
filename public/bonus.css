@@ -11,5 +11,34 @@
 }
 
 #read_row{
-    color: grey;
+    color: lightgray;
+}
+
+.table {
+    color: white;
+}
+
+#matcha-chat{
+    min-width: 90vw;
+    min-height: 80vh;
+    background-color: lightgray;
+}
+
+#matcha-chat{
+    min-width: 80vw;
+    height: 100%;
+    padding: 10px;
+    background-color: lightgray;
+}
+
+#message_control{
+    /* position: fixed; */
+    bottom: 130px;
+}
+
+#chat_bubble{
+    background-color: lightblue;
+    width: 100%;
+    padding: 3px;
+    border-radius: 5%;
 }

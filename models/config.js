@@ -282,7 +282,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`messaging` ";
-sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += "(`message_log` INT(10) AUTO_INCREMENT PRIMARY KEY, `sender` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
 sql += " `message` VARCHAR(1000), `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -348,7 +348,7 @@ function escapeHtml(unsafe) {
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 }
-
+/*
 var x = 0;
 for (const item of users){
   var pass = encryption(item.password);
@@ -424,4 +424,4 @@ for (const item of users){
     }
   });
   x++;
-}
+}*/
