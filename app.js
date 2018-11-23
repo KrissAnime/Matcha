@@ -65,6 +65,7 @@ io.on('connection', function(socket){
     // console.log('Made socket connection');
     
     socket.on('chat', function(data){
+        // sql = "INSERT INTO `matcha`.`messaging` (";
         io.sockets.emit('chat', data);
     });
 });
@@ -205,6 +206,13 @@ app.get('/messages', function(req, res){
                     if (err2){
                         console.log(err2);
                     } else {
+                        // functions.double_message(result2, function(call_err, resp){
+                        //     if (call_err){
+                        //         console.log(call_err);
+                        //     } else {
+                                
+                        //     }
+                        // });
                         // console.log(result2);
                         sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles`";
                         con.query(sql, function(err3, result3){
@@ -230,28 +238,37 @@ app.get('/messages', function(req, res){
 
 app.get('/messaging/:unique_key', function(req, res){
     if (req.session.username){
-        sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles` WHERE `unique_key` = '" + req.params.unique_key + "' OR `user_name` = '" + req.session.username + "'";
+        sql = "SELECT `user_name`, `unique_key`, `profile` FROM `matcha`.`profiles` WHERE `unique_key` = '" + req.params.unique_key + "' OR `user_name` = '" + req.session.username + "'";
         con.query(sql, function(err, result){
             if (err){
                 console.log(err);
             } else {
                 if (result[0].user_name == req.session.username){
                     var chat_mate = result[1].user_name;
+                    var chat_profile = "./public/extra/profiles/" + chat_mate + "/" + result[1].profile;
                     var my_key = result[0].unique_key;
+                    var my_profile = "./public/extra/profiles/" + req.session.username + "/" + result[0].profile;
                 } else {
                     var chat_mate = result[0].user_name;
+                    var chat_profile = "./public/extra/profiles/" + chat_mate + "/" + result[1].profile;
                     var my_key = result[1].unique_key;
+                    var my_profile = "./public/extra/profiles/" + req.session.username + "/" + result[0].profile;
                 }
                 sql = "SELECT * FROM `matcha`.`messaging` WHERE `receiver` = '" + my_key + "' AND `sender` = '" + req.params.unique_key + "'";
+                sql += " OR `receiver` = '" + req.params.unique_key + "' AND `sender` = '" + my_key + "' ORDER BY `time_log` ASC";
                 con.query(sql, function(err2, result2){
                     if (err2){
                         console.log(err2);
                     } else {
+                        console.log(result2);
                         res.render('messaging',
                         {
                             session: req.session.username,
                             chat_mate: chat_mate,
-                            messages: result2
+                            messages: result2,
+                            my_key: my_key,
+                            my_profile: my_profile,
+                            chat_profile: chat_profile
                         });
                     }
                 });

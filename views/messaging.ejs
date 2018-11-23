@@ -6,19 +6,23 @@
 <div id="matcha-chat">
     <div id="chat-window">
         <div id="old_output">
-            <% messages.forEach(function(message){ %>
-                <div id="chat_bubble"><%= chat_mate %>: <p><strong></strong><%= message.message %></p></div>
-            <% }) %>
+            <% messages.forEach(function(message){ 
+                if (message.sender != "NULL"){%>
+                    <div id="chat_bubble"><div id="chat_mate"><% if (message.sender != my_key){ %>
+                        <%= chat_mate %>: 
+                        <% } else { %>
+                        <%= session %>: <% } %>
+                        </div><p><strong></strong><%= message.message %></p></div><br>
+                <% }}) %>
         </div>
         <div id="output"></div>
         <div id="feedback"></div>
-        <div id="message_control" valign="bottom">
-                <input id="handle" type="hidden" value="<%= session %>"/><br>
-                <textarea id="message" type="text" placeholder="Message" cols="75" rows="4"></textarea>
-                <br><button id="send_message">Send</button>
-        </div>
     </div>
-    
+        <div id="message_control" valign="bottom">
+            <input id="handle" type="hidden" value="<%= session %>"/><br>
+            <textarea id="message" type="text" placeholder="Message" rows="4"></textarea>
+            <br><button id="send_message">Send</button>
+        </div>
 </div>
 <script src="/chat.js"></script>
 

@@ -167,3 +167,21 @@ module.exports.registration_input = function (register, callback){
         }
     });
 }
+
+module.exports.double_message = function(data, callback){
+    var max = data.length;
+    var start = 0;
+    var next = 1;
+    
+    data.forEach(element => {
+        while (next <= max){
+            if (element.sender == data[next].sender){
+                data[next].sender = "NULL";
+            }
+            next++;
+        }
+        start++;
+        next = start + 1;
+    });
+    callback(null, data);
+}
