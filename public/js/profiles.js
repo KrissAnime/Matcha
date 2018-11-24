@@ -80,6 +80,67 @@ span.onclick = function() {
     modal.style.display = "none";
 }
 
+var love_level_1 = document.getElementById('profile_heart1');
+    love_level_2 = document.getElementById('profile_heart2'),
+    love_level_3 = document.getElementById('profile_heart3'),
+    love_level_4 = document.getElementById('profile_heart4'),
+    love_level_5 = document.getElementById('profile_heart5');
+
+love_level_1.onclick = function(){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/like_me",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=1");
+}
+
+love_level_2.onclick = function(){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/like_me",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=2");
+}
+
+love_level_3.onclick = function(){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/like_me",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=3");
+}
+
+love_level_4.onclick = function(){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/like_me",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=4");
+}
+
+love_level_5.onclick = function(){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/like_me",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=5");
+}
+
 like_button.onclick = function() {
     xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST","/like",true);
@@ -93,7 +154,15 @@ like_button.onclick = function() {
 }
 
 block_button.onclick = function() {
-    // console.log(session_name);
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST","/block",true);
+    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+            console.log("Blocked");
+        }
+    }
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key);
 }
 
 // $('#profile_heart1').click(function(){

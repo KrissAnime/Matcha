@@ -21,7 +21,7 @@ var users = [
     "first_name": "General",
     "last_name": "Esdeath",
     "user_name": "Ice Queen",
-    "email": "krissultimatum+iceqeen@gmail.com",
+    "email": "krissultimatum2+iceqeen@gmail.com",
     "password": "",
     "fame_rating": "5",
     "age": "26",
@@ -39,7 +39,7 @@ var users = [
     "first_name": "Leone",
     "last_name": "Lionelle",
     "user_name": "Cat Girl",
-    "email": "krissultimatum+catgirl@gmail.com",
+    "email": "krissultimatum2+catgirl@gmail.com",
     "password": "",
     "fame_rating": "4.5",
     "age": "21",
@@ -75,7 +75,7 @@ var users = [
     "first_name": "November",
     "last_name": "Terra",
     "user_name": "Nova",
-    "email": "krissultimatum+nova@gmail.com",
+    "email": "krissultimatum2+nova@gmail.com",
     "password": "",
     "fame_rating": "4",
     "age": "23",
@@ -243,11 +243,11 @@ con.query(sql, function (err, result) {
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`images` ";
 sql += "(`unique_key` VARCHAR(255) NOT NULL PRIMARY KEY ,";
-sql += " `profile` VARCHAR(60) NOT NULL ,";
-sql += " `img_01` VARCHAR(255) DEFAULT NULL ,";
-sql += " `img_02` VARCHAR(255) DEFAULT NULL ,";
-sql += " `img_03` VARCHAR(255) DEFAULT NULL ,";
-sql += " `img_04` VARCHAR(255) DEFAULT NULL )";
+sql += " `profile` VARCHAR(60) DEFAULT 'NULL' ,";
+sql += " `img_01` VARCHAR(255) DEFAULT 'NULL' ,";
+sql += " `img_02` VARCHAR(255) DEFAULT 'NULL' ,";
+sql += " `img_03` VARCHAR(255) DEFAULT 'NULL' ,";
+sql += " `img_04` VARCHAR(255) DEFAULT 'NULL' )";
 sql += "ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -271,7 +271,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`likes` ";
-sql += "(`instigator` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
+sql += "(`like_id` INT(6) AUTO_INCREMENT PRIMARY KEY, `instigator` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
 sql += " `choice` VARCHAR(6), `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP, `rating` INT(1)) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -295,7 +295,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`block` ";
-sql += "(`sender` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
+sql += "(`block_id` INT(6) AUTO_INCREMENT PRIMARY KEY, `sender` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
 sql += " `status` BOOLEAN, `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -316,6 +316,18 @@ con.query(sql, function(err, result){
         console.log("User Tags Table Created");
     }
 })
+
+sql = "CREATE TABLE IF NOT EXISTS `matcha`.`rating` ";
+sql += "(`rating_id` INT(9) AUTO_INCREMENT PRIMARY KEY, `rator` VARCHAR(255) NOT NULL , `rated` VARCHAR(255) NOT NULL ,";
+sql += " `rating` INT(1) NOT NULL) ENGINE = InnoDB;";
+con.query(sql, function (err, result) {
+  if (err){
+    console.log(err);
+  }
+  else{
+    console.log("Rating Table Created");
+  }
+});
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`verification` ";
 sql += "(`email` VARCHAR(50) NOT NULL PRIMARY KEY ,";
@@ -349,7 +361,7 @@ function escapeHtml(unsafe) {
   .replace(/"/g, "&quot;")
   .replace(/'/g, "&#039;");
 }
-/*
+
 var x = 0;
 for (const item of users){
   var pass = encryption(item.password);
@@ -425,4 +437,4 @@ for (const item of users){
     }
   });
   x++;
-}*/
+}

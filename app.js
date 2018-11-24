@@ -1,5 +1,3 @@
-// console.log("Log 1");
-
 function escapeHtmlReverse(unsafe) {
     return unsafe
         .replace(/&amp;/g, '&')
@@ -23,8 +21,6 @@ var con = mysql.createConnection({
     user: "root",
     password: "Asuka2016"
 });
-
-var monitor;
 
 // Init App
 var app = express();
@@ -127,22 +123,35 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                             console.log(err);
                         }
                         else {
-                            // console.log(result2);
-                            sql = "SELECT `rating` FROM `matcha`.`likes` WHERE `instigator` = '" + req.session.username + "'";
-                            con.query(sql, function (err2, result3) {
-                                if (err2) {
-                                    console.log(err2);
+                            sql4 = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = '" + req.session.username + "'";
+                            con.query(sql4, function(err, result4){
+                                if (err){
+                                    console.log(err);
                                 } else {
-                                    // console.log(result3);
-                                    var rate = result3.rating;
-                                    res.render('profiles',
-                                        {
-                                            users: result,
-                                            images: result2,
-                                            session: req.session.username,
-                                            rating: rate, 
-                                            hidden_key: req.params.unique_key
-                                        });
+                                    var my_key = result4[0].unique_key;
+                                    sql = "SELECT `rating` FROM `matcha`.`rating` WHERE `rated` = '" + req.params.unique_key + "' AND `rator` = '" + my_key + "'";
+                                    con.query(sql, function (err2, result3) {
+                                        if (err2) {
+                                            console.log(err2);
+                                        } else {
+                                            // console.log(result3);
+                                            // var rate = result3.rating;
+                                            if (result3[0]){
+                                                var rate = result3[0].rating;
+                                            } else {
+                                                var rate = 0;
+                                            }
+                                            console.log(result3);
+                                            res.render('profiles',
+                                                {
+                                                    users: result,
+                                                    images: result2,
+                                                    session: req.session.username,
+                                                    rating: rate, 
+                                                    hidden_key: req.params.unique_key
+                                                });
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -464,6 +473,8 @@ app.get('/search', function (req, res) {
     }
 });
 
+/****** Beginning of Backend Ajax pages here ********/
+
 //Likes a user profile
 app.post('/like', function (req, res) {
     // console.log(req.body.session);
@@ -478,20 +489,20 @@ app.post('/like', function (req, res) {
             con.query(sql2, function(err2, result2){
                 if (err2){
                 } else {
-                    var subject = "Matcha Like Status";
+                    var subject = "Matcha Like Alert";
                     if (result2[0]){
                         sql3 = "DELETE FROM `matcha`.`likes` WHERE `instigator` = '" + my_key + "' AND `receiver` = '" + req.body.hidden_key + "'";
                         var message = "It looks like " + req.body.session + " no longer likes you! :'(";
                     } else {
                         sql3 = "INSERT INTO `matcha`.`likes` (`instigator`, `receiver`) VALUES ('" + my_key + "', '" + req.body.hidden_key + "')";
-                        var message = "It looks like " + req.body.session + " no likes you! :) Maybe you should like them back?\nhttps://localhost:3000/profiles/" + req.body.hidden_key;
+                        var message = "It looks like " + req.body.session + " likes you! :) Maybe you should like them back?\nLogin now and check out their profile page!\n\nhttp://localhost:3000/profiles/" + my_key;
                     }
                     con.query(sql3, function(err3, result3){
                         if (err3){
                             console.log(err3);
                         } else {
                             // console.log(result3);
-                            sql4 = "SELECT `user_name`, `email` FROM `matcha`.`profiles` WHERE `unique_key` = '" + req.body.hidden_key + "'";
+                            sql4 = "SELECT `matcha`.`users`.`email`, `matcha`.`users`.`user_name` FROM `matcha`.`users` INNER JOIN `matcha`.`profiles` ON `matcha`.`users`.`user_name` = `matcha`.`profiles`.`user_name` WHERE `matcha`.`profiles`.`unique_key` = '" + req.body.hidden_key + "'";
                             con.query(sql4, function(err4, result4){
                                 if (err4){
                                     console.log(err4);
@@ -506,6 +517,7 @@ app.post('/like', function (req, res) {
                                             console.log(err_mail);
                                         } else {
                                             console.log(resp_mail);
+                                            alert('You Liked ' + result4[0].user_name);
                                         }
                                     })
                                 }
@@ -518,17 +530,131 @@ app.post('/like', function (req, res) {
     });
 });
 
-//Beginning of Backend Ajax pages here
+//Blocks a user profile
+app.post('/block', function (req, res) {
+    // console.log(req.body.session);
+    // console.log(req.body.hidden_key);
+    sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = '" + req.body.session + "'";
+    con.query(sql, function(err, result){
+        if (err){
+            console.log(err);
+        } else {
+            var my_key = result[0].unique_key;
+            sql2 = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE `instigator` = '" + my_key + "' AND `receiver` = '" + req.body.hidden_key + "'";
+            con.query(sql2, function(err2, result2){
+                if (err2){
+                } else {
+                    var subject = "Matcha Block Alert";
+                    var message = "It looks like " + req.body.session + " blocked you...\n\n Too bad, so sad... :'(";
+                    if (result2[0]){
+                        sql3 = "DELETE FROM `matcha`.`likes` WHERE `instigator` = '" + my_key + "' AND `receiver` = '" + req.body.hidden_key + "'";
+                    }
+                    sql_elite = "SELECT `sender`, `receiver` FROM `matcha`.`block` WHERE `sender` = '" + my_key + "' AND `receiver` = '" + req.body.hidden_key + "'";
+                    con.query(sql_elite, function(err_eli, res_eli){
+                        if (err_eli){
+                            console.log(err_eli);
+                        } else {
+                            sql_elite_2 = "";
+                            if (res_eli[0]){
+                                sql_elite_2 = "DELETE FROM `matcha`.`block` WHERE `sender` = '" + my_key + "' AND `receiver` = '" + req.body.hidden_key + "'";
+                            }
+                            con.query(sql_elite_2, function(err_eli_2, res_eli_2){
+                                if (err_eli_2){
+                                    console.log(err_eli_2);
+                                } else {
+                                    console.log("Entry Deleted from block table");
+                                }
+                            });
+                            sql3 = "INSERT INTO `matcha`.`block` (`sender`, `receiver`, `status`) VALUES ('" + my_key + "', '" + req.body.hidden_key + "', 0)";
+                            con.query(sql3, function(err3, result3){
+                                if (err3){
+                                    console.log(err3);
+                                } else {
+                                    // console.log(result3);
+                                    sql4 = "SELECT `matcha`.`users`.`email`, `matcha`.`users`.`user_name` FROM `matcha`.`users` INNER JOIN `matcha`.`profiles` ON `matcha`.`users`.`user_name` = `matcha`.`profiles`.`user_name` WHERE `matcha`.`profiles`.`unique_key` = '" + req.body.hidden_key + "'";
+                                    con.query(sql4, function(err4, result4){
+                                        if (err4){
+                                            console.log(err4);
+                                        } else {
+                                            var data = {
+                                                email: result4[0].email,
+                                                subject: subject,
+                                                text: message
+                                            }
+                                            functions.mailman(data, function(err_mail, resp_mail){
+                                                if (err_mail){
+                                                    console.log(err_mail);
+                                                } else {
+                                                    console.log(resp_mail);
+                                                    alert('You Blocked ' + result4[0].user_name);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    })
+                }
+            });
+        }
+    });
+});
 
 //Rating a user
 app.post('/like_me', function (req, res) {
-    console.log(data.rate);
-    console.log(rate);
-})
+    console.log(req.body.session);
+    console.log(req.body.hidden_key);
+    console.log(req.body.love_level);
+    sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = '" + req.body.session + "'";
+    con.query(sql, function(err, result){
+        if (err){
+            console.log(err);
+        } else {
+            var my_key = result[0].unique_key;
+            console.log(my_key);
+            sql2 = "SELECT `rating` FROM `matcha`.`rating` WHERE `rator` = '" + my_key + "' AND `rated` = '" + req.body.hidden_key + "'";
+            con.query(sql2, function(err2, result2){
+                if (err2){
+                    console.log(err2);
+                } else {
+                    // console.log(result2[0].rating);
+                    console.log(result2[0]);
+                    if (result2[0]){
+                        if (req.body.love_level == result2[0].rating){
+                            var love_me = 0;
+                        } else {
+                            var love_me = req.body.love_level;
+                        }
+                        console.log(my_key);
+                        console.log(req.body.hidden_key);
+                        sql3 = "UPDATE `matcha`.`rating` SET `rating` = " + love_me + " WHERE `rator` = '" + my_key + "' AND `rated` = '" + req.body.hidden_key + "'";
+                        con.query(sql3, function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            } else {
+                                console.log(req.body.session + " changed their rating of someone..?");
+                            }
+                        });
+                    } else {
+                        sql3 = "INSERT INTO `matcha`.`rating` (`rator`, `rated`, `rating`) VALUES ('" + my_key + "', '" + req.body.hidden_key + "', " + req.body.love_level + ")";
+                        con.query(sql3, function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            } else {
+                                console.log(req.body.session + " changed their rating of someone..?");
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
+});
 
 //For when users attempt an invalid or broken url
 app.use(function (req, res) {
     res.render('error');
-})
+});
 
 

@@ -76,11 +76,11 @@
                                             
                                             <div id="panel-warning" style="margin-left: 43.5%; color: yellow">
                                                 <% if (rating) {
-                                                    for (var i = 0; i < user.fame_rating; i++){ %>
-                                                        <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
+                                                    for (var i = 0; i < rating; i++){ %>
+                                                        <i id="profile_heart<%= i + 1 %>" class="fas fa-star"></i>
                                                         <% } 
                                                         while (i < 5){ %>
-                                                            <i class="far fa-star" stule="width: 12px;"></i>
+                                                            <i id="profile_heart<%= i + 1 %>" class="far fa-star"></i>
                                                             <% i++;
                                                         } 
                                                     } else { %>
