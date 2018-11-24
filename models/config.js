@@ -229,6 +229,7 @@ sql += " `fame_rating` INT(1) DEFAULT '0' ,";
 sql += " `age` INT(2) NOT NULL ,";
 sql += " `gender` INT(1) NOT NULL ,";
 sql += " `sexual_pref` INT(1) NOT NULL ,";
+sql += " `location` VARCHAR(200) NOT NULL ,";
 sql += " `bio` VARCHAR(1500) NOT NULL ,";
 sql += " `interests` VARCHAR(1000) NOT NULL) ENGINE = InnoDB";
 con.query(sql, function (err, result) {
@@ -270,7 +271,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`likes` ";
-sql += "(`instigator` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += "(`instigator` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
 sql += " `choice` VARCHAR(6), `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP, `rating` INT(1)) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -294,7 +295,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`block` ";
-sql += "(`sender` INT(6) NOT NULL , `receiver` INT(6) NOT NULL, ";
+sql += "(`sender` VARCHAR(255) NOT NULL , `receiver` VARCHAR(255) NOT NULL, ";
 sql += " `status` BOOLEAN, `time_log` DATETIME DEFAULT CURRENT_TIMESTAMP) ENGINE = InnoDB;";
 con.query(sql, function (err, result) {
   if (err){
@@ -306,7 +307,7 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`user_tags`";
-sql += "(`user_id` INT(6) NOT NULL, `tag_id` INT(3) NOT NULL) ENGINE = InnoDB;";
+sql += "(`user_tag_id` INT(8) AUTO_INCREMENT PRIMARY KEY, `unique_key` VARCHAR(255), `tag_name` VARCHAR(30) NOT NULL) ENGINE = InnoDB;";
 con.query(sql, function(err, result){
     if (err){
         console.log(err);

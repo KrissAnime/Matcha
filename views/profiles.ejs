@@ -1,11 +1,21 @@
 <% include partials/head %>
 <header>
-    <%- include('partials/header', {session: session}); %>
+    <%- include('header', {session: session}); %>
 </header>
+
+<div id='myModal' class='modal'>
+	<br/>
+	<div id='image_box'>
+		<span class='close' style='color: white'>&times;</span>
+			<div id='modal_image'>
+			</div>
+			<br/>
+	</div>
+</div>
 
 <div class="user_profiles">
     <% users.forEach(function(user){ %>
-        <div id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
+        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= user.profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
             <div class="" ></div>
         </div>
         <div id="user_bio_details">
@@ -60,11 +70,11 @@
                                                 <p id="user_other_about_me_text"><%= user.bio %></p>
                                             </div>
                                             <div class="btn-group" style="margin: auto; margin-left: 43%">
-                                                <button type="button" class="btn btn-success">Like</button>
-                                                <button type="button" class="btn btn-danger">Block</button>
+                                                <button id="like_button" type="button" class="btn btn-success">Like</button>
+                                                <button id="block_button" type="button" class="btn btn-danger">Block</button>
                                             </div>
                                             
-                                            <div id="panel-warning" style="margin-left: 44%; color: yellow">
+                                            <div id="panel-warning" style="margin-left: 43.5%; color: yellow">
                                                 <% if (rating) {
                                                     for (var i = 0; i < user.fame_rating; i++){ %>
                                                         <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
@@ -84,66 +94,16 @@
                                                     
                                                 </div>
                                                 <% images.forEach(function(image){ %>
-                                                    <div id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
-                                                    <div id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
-                                                    <div id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
-                                                    <div id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
                                                     <% }) %>
                                                     <% }) %>
                                                 </div>
                                                 
-                                                <script>
-                                                    
-                                                    $('#profile_heart1').hover(function(){
-                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
-                                                    }, function(){
-                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
-                                                    });
-                                                    
-                                                    $('#profile_heart2').hover(function(){
-                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
-                                                    }, function(){
-                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
-                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                    });
-                                                    
-                                                    $('#profile_heart3').hover(function(){
-                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
-                                                    }, function(){
-                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
-                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                    });
-                                                    
-                                                    $('#profile_heart4').hover(function(){
-                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart3').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
-                                                    }, function(){
-                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart3').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
-                                                    });
-                                                    
-                                                    $('#profile_heart5').hover(function(){
-                                                        $('#profile_heart1').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart2').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart3').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $('#profile_heart4').removeClass("far fa-star").addClass("fas fa-star");
-                                                        $(this).removeClass("far fa-star").addClass("fas fa-star");
-                                                    }, function(){
-                                                        $('#profile_heart1').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart2').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart3').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $('#profile_heart4').removeClass("fas fa-star").addClass("far fa-star");                                                        
-                                                        $(this).removeClass("fas fa-star").addClass("far fa-star");
-                                                    });
-                                                    
-                                                    
+                                                <input id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
+                                                <input id="session_name" type="hidden" value="<%= session %>"/>
+                                                <script src="/js/profiles.js">
                                                 </script>
                                                 <% include partials/footer %>

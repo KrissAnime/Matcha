@@ -1,20 +1,38 @@
 <% include partials/head %>
 <header>
-    <%- include('partials/header', {session: session}); %>
+    <%- include('header', {session: session}); %>
 </header>
 
 <table class="w3-table w3-bordered" style="color: white">
     <% if (messages){
-        messages.forEach(function(message){ %>
+        messages.forEach(function(message){ 
+            if (message.sender != "NULL"){ %>
             <tr>
                 <td><% users.forEach(function(user){
-                    if (user.unique_key == message.sender){ %>
-                        <a href="messaging/<%= user.unique_key %>" style="color: white"><div>
-                        <%= user.user_name %></div><mess><%= message.message %></mess></a></td>
+                    if (message.receiver == user.unique_key){
+                        var text = user.user_name;
+                    }
+                    if (user.unique_key == message.sender && user.unique_key != my_key){ %>
+                        <a href="messaging/<%= message.sender %>" style="color: white"><div>
+                            <% users.forEach(function(name){
+                                if (message.sender == name.unique_key){ %>
+                                    <%= name.user_name %></div><mess><%= message.message %></mess></a></td>
+                                <% }
+                            }); %>
+                        
                         <% }
+                    if (user.unique_key == message.sender && user.unique_key == my_key){ %>
+                        <a href="messaging/<%= message.receiver %>" style="color: white"><div>
+                                <% users.forEach(function(name){
+                                    if (message.receiver == name.unique_key){ %>
+                                        <%= name.user_name %></div><mess><%= message.message %></mess></a></td>
+                                    <% }
+                                }); %>
+                            
+                            <% }
                     }) %>
                 </tr>
-                <%  });
+                <%  }});
             } else { %>
                 <tr>
                     <td>You have no messages! Go make some friends!</td>

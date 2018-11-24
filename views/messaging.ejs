@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-        <%- include('partials/header', {session: session}); %>
+        <%- include('header', {session: session}); %>
 </header>
 
 <div id="matcha-chat">
@@ -8,11 +8,11 @@
         <div id="old_output">
             <% messages.forEach(function(message){ 
                 if (message.sender != "NULL"){%>
-                    <div id="chat_bubble"><div id="chat_mate"><% if (message.sender != my_key){ %>
-                        <%= chat_mate %>: 
+                    <div id="chat_bubble"><% if (message.sender != my_key){ %>
+                        <p><strong> <%= chat_mate %>: </strong>
                         <% } else { %>
-                        <%= session %>: <% } %>
-                        </div><p><strong></strong><%= message.message %></p></div><br>
+                            <p><strong><%= session %>: <% } %></strong>
+                        <%= message.message %></p></div><br>
                 <% }}) %>
         </div>
         <div id="output"></div>
@@ -20,10 +20,12 @@
     </div>
         <div id="message_control" valign="bottom">
             <input id="handle" type="hidden" value="<%= session %>"/><br>
+            <input id="chat_mate" type="hidden" value="<%= chat_key %>"/><br>
+            <input id="my_key" type="hidden" value="<%= my_key %>"/><br>
             <textarea id="message" type="text" placeholder="Message" rows="4"></textarea>
             <br><button id="send_message">Send</button>
         </div>
 </div>
-<script src="/chat.js"></script>
+<script src="/js/chat.js"></script>
 
 <% include partials/footer %>

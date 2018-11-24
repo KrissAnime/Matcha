@@ -3,6 +3,19 @@
   "version": "1.0.0",
   "description": "Matcha 42 Project",
   "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrissAnime/matcha.git"
+  },
+  "author": "Crescendo Bester",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KrissAnime/matcha/issues"
+  },
+  "homepage": "https://github.com/KrissAnime/matcha#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.3",
@@ -10,6 +23,7 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "express-validator": "^5.3.0",
+    "fd": "0.0.3",
     "fs": "0.0.1-security",
     "jsonfile": "^5.0.0",
     "multer": "^1.4.1",
@@ -19,10 +33,7 @@
     "socket.io": "^2.1.1",
     "url": "^0.11.0"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Crescendo Bester",
-  "license": "ISC"
+  "devDependencies": {
+    "nodemon": "^1.18.6"
+  }
 }

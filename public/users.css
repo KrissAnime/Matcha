@@ -189,3 +189,83 @@
     text-align: center;
     background-color: gold;
 }
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: black;
+    size: 100px;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    /* padding-top: 30px; */
+    left: 10px;
+    right: 10px;
+    margin-top: 10px;
+    background-size: cover;
+    background-position: center;
+    /* bottom: 10px; */
+    /* top: 15px; */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    }
+
+/* Caption of Modal Image (Image Text) - Same Width as the Image */
+/* #caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+} */
+
+/* The Close Button */
+.close {
+    position: relative;
+    /* top: 20px;
+    right: 50px; */
+    color: black;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    size: 100px;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#image_box {
+    width: 90%;
+    height: 87%;
+    padding: 10px;
+    margin: auto;
+    /* align-content: center; */
+    background-color: black;
+}
+
+#modal_image {
+    width: 90%;
+    height: 90%;
+    margin: auto;
+    margin-top: 20px;
+    background-size: cover;
+    background-position: center;
+    margin: auto;
+    display: block;
+}

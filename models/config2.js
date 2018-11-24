@@ -7,6 +7,25 @@ var con = mysql.createConnection({
     password: "Asuka2016"
 });
 
+function add_my_tag(element, callback){
+    var temp_tags = element.interests.split(",");
+    var num_tags = temp_tags.length;
+    var index = 0;
+    while (index < num_tags){
+        sql = "INSERT INTO `matcha`.`user_tags` (`unique_key`, `tag_name`) VALUES ('" + element.unique_key + "', '" + temp_tags[index] + "')";
+        con.query(sql, function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                console.log('Search Tag Added!');
+            }
+        });
+        index++;
+
+    }
+    callback(null, "Success");
+}
+
 function twin(user_tag){
     var max = user_tag.length;
     var start = 0;
@@ -23,7 +42,7 @@ function twin(user_tag){
     return user_tag;
 }
 
-sql = "SELECT `interests` FROM `matcha`.`profiles`";
+sql = "SELECT `interests`, `unique_key` FROM `matcha`.`profiles`";
 con.query(sql, function (err, result) {
     if (err){
         console.log(err);
@@ -31,8 +50,14 @@ con.query(sql, function (err, result) {
     else{
         var tag_list = "";
         result.forEach(element => {
-            tag_list += element.interests;
-            tag_list += ",";
+            add_my_tag(element, function(call_err, resp){
+                if (call_err){
+                    console.log(call_err);
+                } else {
+                    tag_list += element.interests;
+                    tag_list += ",";
+                }
+            });
         });
         // console.log(tag_list);
         tag_list = tag_list.split(",");
