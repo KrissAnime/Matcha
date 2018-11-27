@@ -1,0 +1,24 @@
+<!-- vies/partials/header -->
+
+<div class="w3-display-container" style="height: 50px; margin-right: 1vw;">
+    <div id="project_logo">Matcha</div>
+    <div class="w3-display-right top_bar_links">
+        <a href="../../notifications"><i class="far fa-bell" style="color: white"></i></a>
+        <a href="../../messages"><i class="fas fa-comments" style="color: white"></i></a>
+        <a href="../../profile"><i class="fas fa-user-alt" style="color: white"></i></a>
+    </div>
+</div>
+
+<div class="w3-bar w3-black">
+    <a href="../../" class="w3-bar-item w3-button" >Home</a>
+    <a href="../../search" class="w3-bar-item w3-button">Search</a>
+        <% if (session){ %>
+            <div class="w3-right">
+            <a href="../../logout" class="w3-bar-item w3-button">Logout</a>
+        </div>
+        <% } else { %>
+        <div class="w3-right">
+            <a href="../../login" class="w3-bar-item w3-button">Login</a>
+        </div>
+        <% } %>
+</div>

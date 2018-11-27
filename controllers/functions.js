@@ -1,6 +1,7 @@
 var mysql = require('mysql');
 const crypto = require('crypto');
 var nodemailer = require('nodemailer');
+var geoip = require('geoip-lite');
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -12,11 +13,11 @@ var transporter = nodemailer.createTransport({
 
 function escapeHtmlReverse(unsafe) {
     return unsafe
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'");
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
 }
 
 function encryption(password){
@@ -33,8 +34,24 @@ var con = mysql.createConnection({
     password: "Asuka2016"
 });
 
+module.exports.blocka = function(result, result2, callback){
+    var clear = 1;
+    result.forEach(element => {
+        result2.forEach(element2 => {
+            if (element.unique_key == element2.receiver || element.unique_key == element2.sender){
+                clear = 0;
+            }
+        });
+        if (!clear){
+            element.unique_key = "NULL";
+            clear = 1;
+        }
+    });
+    callback(null, result);
+}
+
 module.exports.log_me_in = function(data, callback){
-    sql = "SELECT `user_name`, `password` FROM `matcha`.`users`";
+    sql = "SELECT `user_name`, `password`, `verified` FROM `matcha`.`users`";
     con.query(sql, function(err, result){
         if (err){
             console.log(err);
@@ -42,8 +59,10 @@ module.exports.log_me_in = function(data, callback){
             var verified = '0';
             var pass = encryption(data.password);
             result.forEach(element => {
-                if (element.user_name == data.username && element.password == pass){
+                if (element.user_name == data.username && element.password == pass && element.verified == 1){
                     verified = '1';
+                } else if (element.user_name == data.username && element.password == pass && element.verified == 2){
+                    verified = '2';
                 }
             });
             callback(null, verified);
@@ -66,14 +85,14 @@ module.exports.verification_code = function(data, callback){
             if (!verified){
                 callback ("fail",null);
             }
-            sql = "UPDATE `matcha`.`users` SET `verified` = '1' WHERE `users`.`email` = '" + data.email + "'";
-            con.query(sql, function(err, result){
+            sql = "UPDATE `matcha`.`users` SET `verified` = '2' WHERE `users`.`email` = ?";
+            con.query(sql, [data.email], function(err, result){
                 if (err){
                     console.log(err);
                 } else {
                     console.log("Users table updated");
-                    sql = "DELETE FROM `matcha`.`verification` WHERE `verification`.`email` = '" + data.email + "'";
-                    con.query(sql, function(err, result){
+                    sql = "DELETE FROM `matcha`.`verification` WHERE `verification`.`email` = ?";
+                    con.query(sql, [data.email], function(err, result){
                         if (err){
                             console.log(err);
                         } else {
@@ -117,7 +136,7 @@ function check_fame(fame_rating, element){
 }
 
 function check_tag(tag, tag_result, old_element){
- 
+    
     var temp = 0;
     tag_result.forEach(new_element => {
         if (tag.trim() == new_element.tag_name.trim() && old_element.unique_key == new_element.unique_key){
@@ -132,14 +151,28 @@ function check_tag(tag, tag_result, old_element){
     }
 };
 
+function check_blocker(element, result3){
+    var temp = 1;
+    result3.forEach(element3 => {
+        if (element3.receiver == element.unique_key || element3.sender){
+            temp = 0;
+        }
+    });
+    if (!temp){
+        element.unique_key = "NULL";
+        return element;
+    } else {
+        return element;
+    }
+}
+
 module.exports.search_and_recover = function (data, callback){
-    sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "'";
     
     if(!data.age_low || data.age_low < 18){
         data.age_low = 18;
     }
-    if(!data.age_max || data.age_max > 40){
-        data.age_max = 40;
+    if(!data.age_max || data.age_max > 60){
+        data.age_max = 60;
     }
     if (data.age_low && data.age_max && data.age_low > data.age_max){
         var temp = data.age_max;
@@ -161,35 +194,46 @@ module.exports.search_and_recover = function (data, callback){
     if(!data.tag_3){
         data.tag_3 = -1;
     }
-    con.query(sql, function(err, result){
-        if (err){
-            console.log(err);
-        }
-        else{
-            sql2 = "SELECT `tag_name`, `unique_key` FROM `matcha`.`user_tags`";
-            con.query(sql2, function(err2, result2){
-                if (err2){
-                    console.log(err2);
-                } else {
-                    result.forEach(element => {
-                        element = check_age(data.age_low, data.age_max, element);
-                        if (data.rating != -1){
-                            element = check_fame(data.rating, element);
-                        }
-                        if (data.tag_1 != -1){
-                            element = check_tag(data.tag_1, result2, element);
-                        }
-                        if (data.tag_2 != -1){
-                            element = check_tag(data.tag_2, result2, element);                    
-                        }
-                        if (data.tag_3 != -1){
-                            element = check_tag(data.tag_3, result2, element);                         
-                        }
-                        element.bio = escapeHtmlReverse(element.bio);
-                    });
-                    callback(null, result);
+    sql2 = "SELECT `receiver`, `sender` FROM `matcha`.`block` WHERE `sender` = ? OR `receiver` = ?";
+    con.query(sql2, [data.blocker_key, data.blocker_key], function(err3, result3){
+        if (err3){
+            console.log(err2);
+        } else {
+            sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "'";
+            con.query(sql, function(err, result){
+                if (err){
+                    console.log(err);
                 }
-            })
+                else{
+                    sql2 = "SELECT `tag_name`, `unique_key` FROM `matcha`.`user_tags`";
+                    con.query(sql2, function(err2, result2){
+                        if (err2){
+                            console.log(err2);
+                        } else {
+                            result.forEach(element => {
+                                if (result3[0]){
+                                    element = check_blocker(element, result3);
+                                }
+                                element = check_age(data.age_low, data.age_max, element);
+                                if (data.rating != -1){
+                                    element = check_fame(data.rating, element);
+                                }
+                                if (data.tag_1 != -1){
+                                    element = check_tag(data.tag_1, result2, element);
+                                }
+                                if (data.tag_2 != -1){
+                                    element = check_tag(data.tag_2, result2, element);                    
+                                }
+                                if (data.tag_3 != -1){
+                                    element = check_tag(data.tag_3, result2, element);                         
+                                }
+                                element.bio = escapeHtmlReverse(element.bio);
+                            });
+                            callback(null, result);
+                        }
+                    })
+                }
+            });
         }
     });
 }
@@ -202,7 +246,6 @@ module.exports.registration_input = function (register, callback){
     if (register.password !== register.mpassword){
         callback("mismatch", null);
     }
-    var pass = encryption(register.password);
     sql = "SELECT `email`, `user_name` FROM `matcha`.`users`";
     con.query(sql, function(err, result){
         if (err){
@@ -210,23 +253,18 @@ module.exports.registration_input = function (register, callback){
         } else {
             var exists = 0;
             result.forEach(element => {
-                console.log(element.user_name);
-                console.log(register.username);
-                console.log(element.email);
-                console.log(register.email);
                 if (element.user_name === register.username || element.email === register.email){
                     exists = 1;
                 }
             });
-            console.log(exists);
+            // console.log(exists);
             if (exists){
                 callback("exists", null);
             } else {
-                console.log('code');
-                
+                // console.log('code');
                 sql = "INSERT INTO `matcha`.`users` (`user_name`, `email`, `password`, `verified`)";
-                sql += "VALUES ('" + register.username + "', '" + register.email + "', '" + pass + "', '0');";
-                con.query(sql, function(err, result){
+                sql += "VALUES (?, ?, ?, '0');";
+                con.query(sql, [register.username, register.email, pass], function(err, result){
                     if (err){
                         console.log(err);
                     } else {
@@ -235,8 +273,8 @@ module.exports.registration_input = function (register, callback){
                 });
                 var code = encryption(register.username + register.email);
                 sql = "INSERT INTO `matcha`.`verification` (`email`, `code`)";
-                sql += "VALUES ('" + register.email + "', '" + code + "')";
-                con.query(sql, function(err, result){
+                sql += "VALUES (?, ?)";
+                con.query(sql, [register.email, code], function(err, result){
                     if (err){
                         console.log(err);
                     } else {
@@ -290,7 +328,7 @@ module.exports.mailman = function(data, callback){
         subject: data.subject,
         text: data.text
     };
-
+    
     transporter.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);

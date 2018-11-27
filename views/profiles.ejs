@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-    <%- include('header', {session: session}); %>
+    <%- include('partials/header', {session: session}); %>
 </header>
 
 <div id='myModal' class='modal'>
@@ -46,25 +46,25 @@
                             <td>Gender: </td>
                             <% if (user.gender == 1){ %>
                                 <td>Female</td>
-                                <% }else{ %>
-                                    <td>Male</td>
-                                    <% } %>
-                                </tr>
-                                <tr>
-                                    <% if(user.sexual_pref == 0) {%>
-                                        <td>Straight</td>
-                                        <% }else if (user.sexual_pref == 1) { %>
-                                            <td>Bisexual</td>
-                                            <% }else if (user.sexual_pref == 2) { %>
-                                                <td>Gay</td>
-                                                <% }else { %>
-                                                    <td>Lesbian</td>
-                                                    <% } %>
-                                                    <td></td>
-                                                </tr>    
-                                            </table>
-                                            
-                                        </div>
+                            <% }else{ %>
+                                <td>Male</td>
+                            <% } %>
+                        </tr>
+                            <tr>
+                            <% if(user.sexual_pref == 0) {%>
+                                <td>Straight</td>
+                            <% }else if (user.sexual_pref == 1) { %>
+                                <td>Bisexual</td>
+                            <% }else if (user.sexual_pref == 2) { %>
+                                <td>Gay</td>
+                            <% }else { %>
+                                <td>Lesbian</td>
+                            <% } %>
+                            <td></td>
+                        </tr> 
+                    </table>
+                    <a href="../../messaging/<%= hidden_key %>" ><button type="button" class="btn btn-secondary">Chat Now!</button> </a>                     
+            </div>
                                         <div id="user_other_details">
                                             <div id="container" style="padding: 10px; color: white">
                                                 <p id="user_other_about_me_text"><%= user.bio %></p>
@@ -77,10 +77,10 @@
                                             <div id="panel-warning" style="margin-left: 43.5%; color: yellow">
                                                 <% if (rating) {
                                                     for (var i = 0; i < rating; i++){ %>
-                                                        <i id="profile_heart<%= i + 1 %>" class="fas fa-star"></i>
+                                                        <i id="profile_hearts<%= i + 1 %>" class="fas fa-star"></i>
                                                         <% } 
                                                         while (i < 5){ %>
-                                                            <i id="profile_heart<%= i + 1 %>" class="far fa-star"></i>
+                                                            <i id="profile_hearts<%= i + 1 %>" class="far fa-star"></i>
                                                             <% i++;
                                                         } 
                                                     } else { %>

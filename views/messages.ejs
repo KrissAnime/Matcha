@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-    <%- include('header', {session: session}); %>
+    <%- include('partials/header', {session: session}); %>
 </header>
 
 <table class="w3-table w3-bordered" style="color: white">
@@ -13,7 +13,7 @@
                         var text = user.user_name;
                     }
                     if (user.unique_key == message.sender && user.unique_key != my_key){ %>
-                        <a href="messaging/<%= message.sender %>" style="color: white"><div>
+                        <a href="../../messaging/<%= message.sender %>" style="color: white"><div>
                             <% users.forEach(function(name){
                                 if (message.sender == name.unique_key){ %>
                                     <%= name.user_name %></div><mess><%= message.message %></mess></a></td>
@@ -22,7 +22,7 @@
                         
                         <% }
                     if (user.unique_key == message.sender && user.unique_key == my_key){ %>
-                        <a href="messaging/<%= message.receiver %>" style="color: white"><div>
+                        <a href="../../messaging/<%= message.receiver %>" style="color: white"><div>
                                 <% users.forEach(function(name){
                                     if (message.receiver == name.unique_key){ %>
                                         <%= name.user_name %></div><mess><%= message.message %></mess></a></td>

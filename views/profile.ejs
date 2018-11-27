@@ -1,9 +1,85 @@
 <% include partials/head %>
 <header>
-        <%- include('header', {session: session}); %>
+        <%- include('partials/header', {session: session}); %>
 </header>
 
+<div id='myModal' class='modal'>
+	<br/>
+	<div id='image_box'>
+		<span class='close' style='color: white'>&times;</span>
+			<div id='modal_image'>
+			</div>
+			<br/>
+	</div>
+</div>
 
+<div class="user_profiles">
+    <% users.forEach(function(user){ %>
+        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= user.profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
+            <div class="" ></div>
+        </div>
+        <div id="user_bio_details">
+            <div id="fame_rating_index" style="width: 100%">
+                <% for (var i = 0; i < user.fame_rating; i++){ %>
+                    <i class="fas fa-star" style="color: maroon; width: 12px;"></i>
+                    <% } %>
+                    <% while (i < 5){ %>
+                        <i class="far fa-star" stule="width: 12px;"></i>
+                        <% i++ %>
+                        <% } %>
+                    </div><br>
+                    <table style="padding: 1px; width:100%; font-size: 14px">
+                        <tr><%= user.user_name %></tr>
+                        <tr>
+                            <td>Name: </td>
+                            <td><%= user.first_name %></td>
+                        </tr>
+                        <tr>
+                            <td>Surname: </td>
+                            <td><%= user.last_name %></td>
+                        </tr>
+                        <tr>
+                            <td>Age: </td>
+                            <td><%= user.age %></td>
+                        </tr>
+                        <tr>
+                            <td>Gender: </td>
+                            <% if (user.gender == 1){ %>
+                                <td>Female</td>
+                            <% }else{ %>
+                                <td>Male</td>
+                            <% } %>
+                        </tr>
+                            <tr>
+                            <% if(user.sexual_pref == 0) {%>
+                                <td>Straight</td>
+                            <% }else if (user.sexual_pref == 1) { %>
+                                <td>Bisexual</td>
+                            <% }else if (user.sexual_pref == 2) { %>
+                                <td>Gay</td>
+                            <% }else { %>
+                                <td>Lesbian</td>
+                            <% } %>
+                            <td></td>
+                        </tr>
+                    </table>       
+                    <a href="../../editing/<%= user.unique_key %>" ><button type="button" class="btn btn-secondary">Edit Details</button> </a>                     
+            </div>
+                                        <div id="user_other_details">
+                                            <div id="container" style="padding: 10px; color: white">
+                                                <p id="user_other_about_me_text"><%= user.bio %></p>
+                                            </div>
+                                                </div>
+                                                <% images.forEach(function(image){ %>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
+                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
+                                                    <% }) %>
+                                                    <% }) %>
+                                                </div>
+                                                <script src="/js/profiles.js">
+                                                </script>
 
 
 <% include partials/footer %>

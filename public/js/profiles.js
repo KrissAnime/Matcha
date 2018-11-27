@@ -56,6 +56,8 @@ $('#profile_heart5').hover(function(){
     $(this).removeClass("fas fa-star").addClass("far fa-star");
 });
 
+
+
 // Get the image and insert it inside the modal - use its "alt" text as a caption
 var modalImg = document.getElementById("modal_image");
 var captionText = document.getElementById("caption");
@@ -74,17 +76,17 @@ function blowup(event, img){
 
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
-	
+
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() { 
     modal.style.display = "none";
 }
 
-var love_level_1 = document.getElementById('profile_heart1');
-    love_level_2 = document.getElementById('profile_heart2'),
-    love_level_3 = document.getElementById('profile_heart3'),
-    love_level_4 = document.getElementById('profile_heart4'),
-    love_level_5 = document.getElementById('profile_heart5');
+var love_level_1 = document.getElementById('profile_hearts1');
+love_level_2 = document.getElementById('profile_hearts2'),
+love_level_3 = document.getElementById('profile_hearts3'),
+love_level_4 = document.getElementById('profile_hearts4'),
+love_level_5 = document.getElementById('profile_hearts5');
 
 love_level_1.onclick = function(){
     xmlhttp = new XMLHttpRequest();
@@ -131,11 +133,12 @@ love_level_4.onclick = function(){
 }
 
 love_level_5.onclick = function(){
+    
     xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST","/like_me",true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){ 
         }
     }
     xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=5");
@@ -154,15 +157,18 @@ like_button.onclick = function() {
 }
 
 block_button.onclick = function() {
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST","/block",true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
-            console.log("Blocked");
+    if (confirm("Are you sure you want to block this user? This action cannot be undone!")){
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST","/block",true);
+        xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xmlhttp.onreadystatechange=function(){
+            if (xmlhttp.readyState== 4 && xmlhttp.status== 200){
+                console.log("User was blocked");
+                window.location.replace("/");
+            }
         }
+        xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key);
     }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key);
 }
 
 // $('#profile_heart1').click(function(){

@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-        <%- include('header', {session: session}); %>
+        <%- include('partials/header', {session: session}); %>
 </header>
 <table class="w3-table w3-bordered" style="color: white">
         <% if (check){
@@ -11,7 +11,7 @@
                                                 <td><%= notice.notify %> 
                                                         <% users.forEach(function(user){
                                                                 if (user.user_name == notice.instigator){ %>
-                                                                        <a href="profiles/<%= user.unique_key %>"><%= notice.instigator %></a>
+                                                                        <a href="../../profiles/<%= user.unique_key %>"><%= notice.instigator %></a>
                                                                 <% }}) %> on <%= notice.time_log %></td>
                                         </tr>
                                 <% }
@@ -20,7 +20,7 @@
                                                         <td><%= notice.notify %> 
                                                                 <% users.forEach(function(user){
                                                                         if (user.user_name == notice.instigator){ %>
-                                                                                <a href="messaging/<%= user.unique_key %>"><%= notice.instigator %></a>
+                                                                                <a href="../../messaging/<%= user.unique_key %>"><%= notice.instigator %></a>
                                                                         <% }}) %> on <%= notice.time_log %></td>
                                                 </tr>
                                 <% } 

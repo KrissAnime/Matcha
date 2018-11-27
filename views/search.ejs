@@ -1,12 +1,12 @@
 <% include partials/head %>
 <header>
-        <%- include('header', {session: session}); %>
+        <%- include('partials/header', {session: session}); %>
 </header>
 
 <div class="search_options">
     <form action="" method="GET">
-        <input type="number" id="low_age" name="low_age" placeholder="Min-Age" min="18" max="40">
-        <input type="number" id="max_age" name="max_age" placeholder="Max-Age" min="18" max="40">
+        <input type="number" id="low_age" name="low_age" placeholder="Min-Age" min="18" max="60">
+        <input type="number" id="max_age" name="max_age" placeholder="Max-Age" min="18" max="60">
         Rating <select name="rating_select">
             <option></option>
             <option>0-1</option>
@@ -54,7 +54,7 @@
                             if (user.unique_key != "NULL"){ %>
                                 <div>
                                     <div class="central_grid_item">
-                                        <a href="profiles/<%= user.unique_key %>">
+                                        <a href="../../profiles/<%= user.unique_key %>">
                                             <div class="central_grid_picture" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
                                             </div>
                                         </a>

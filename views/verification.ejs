@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-        <%- include('header', {session: session}); %>
+        <%- include('partials/header', {session: session}); %>
 </header>
 
     <div id="verification_box">
@@ -15,7 +15,7 @@
             <% } else if (data == "fail") { %>
                 <h6>Invalid Details</h6>
             <% } else if (data == "pass") {%>
-                <h6>You may now <a href="login">Login</a></h6>
+                <h6>You may now <a href="../../login">Login</a></h6>
                 <% }
             } %>
     </div>

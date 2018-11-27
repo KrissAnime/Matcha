@@ -158,7 +158,7 @@
     display: grid;
     grid-template-areas: 
         'corner user_profile1 user_profile2 user_profile3 user_profile4 '
-        'left middle middle middle middle '
+        'corner user_profile1 user_profile2 user_profile3 user_profile4 '
         'left middle middle middle middle '
         'left middle middle middle middle '
         'left middle middle middle middle ';
