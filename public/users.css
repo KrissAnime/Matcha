@@ -269,3 +269,12 @@
     margin: auto;
     display: block;
 }
+
+#finish_registration {
+	background-color: grey;
+	display: block;
+    margin: auto;
+    width: 300px;
+	padding: 7px;
+	border-radius: 2%;
+}

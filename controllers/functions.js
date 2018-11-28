@@ -20,7 +20,14 @@ function escapeHtmlReverse(unsafe) {
     .replace(/&#039;/g, "'");
 }
 
-function encryption(password){
+function encryption (password){
+    var master_key = crypto.createHash('sha512');
+    master_key.update(password);
+    var hash = master_key.digest('hex');
+    return hash;
+}
+
+module.exports.encryption = function (password){
     var master_key = crypto.createHash('sha512');
     master_key.update(password);
     var hash = master_key.digest('hex');
@@ -239,7 +246,6 @@ module.exports.search_and_recover = function (data, callback){
 }
 
 module.exports.registration_input = function (register, callback){
-    console.log(register);
     if (!register.firstname || !register.lastname || !register.email || !register.username || !register.password || !register.mpassword){
         callback("missing", null);
     }
@@ -257,47 +263,64 @@ module.exports.registration_input = function (register, callback){
                     exists = 1;
                 }
             });
-            // console.log(exists);
-            if (exists){
-                callback("exists", null);
-            } else {
-                // console.log('code');
-                sql = "INSERT INTO `matcha`.`users` (`user_name`, `email`, `password`, `verified`)";
-                sql += "VALUES (?, ?, ?, '0');";
-                con.query(sql, [register.username, register.email, pass], function(err, result){
-                    if (err){
-                        console.log(err);
-                    } else {
-                        console.log("User " + register.username + " Added to users table");
+            sql = "SELECT `email` FROM `matcha`.`verification` WHERE `email` = ?";
+            con.query(sql, [register.email], function(err, result){
+                if (err){
+                    console.log(err);
+                } else {
+                    if (result[0] && result[0].email == register.email){
+                        exists = 1;
                     }
-                });
-                var code = encryption(register.username + register.email);
-                sql = "INSERT INTO `matcha`.`verification` (`email`, `code`)";
-                sql += "VALUES (?, ?)";
-                con.query(sql, [register.email, code], function(err, result){
-                    if (err){
-                        console.log(err);
+                    if (exists){
+                        callback("exists", null);
                     } else {
-                        console.log("User verification code added to verification table");
-                        var mailOptions = {
-                            from: 'KrissAdmin@matcha.com',
-                            to: register.email,
-                            subject: 'Matcha Registration',
-                            text: 'Congratulations for signing up to our Matcha website,\nGo to the following link http://localhost:3000/verification and enter te following code to complete registration:\n' + code
-                        };
-                        
-                        transporter.sendMail(mailOptions, function(error, info){
-                            if (error) {
-                                console.log(error);
+                        var pass = encryption(register.password);
+                        sql = "INSERT INTO `matcha`.`users` (`user_name`, `email`, `password`, `verified`)";
+                        sql += "VALUES (?, ?, ?, '0');";
+                        con.query(sql, [register.username, register.email, pass], function(err, result){
+                            if (err){
+                                console.log(err);
                             } else {
-                                console.log('Email sent: ' + info.response);
-                                callback(null, "pass");
+                                console.log("User " + register.username + " Added to users table");
+                                var code = encryption(register.username + register.email);
+                                sql = "INSERT INTO `matcha`.`verification` (`email`, `code`)";
+                                sql += "VALUES (?, ?)";
+                                con.query(sql, [register.email, code], function(err, result){
+                                    if (err){
+                                        console.log(err);
+                                    } else {
+                                        console.log("User verification code added to verification table");
+                                        var mailOptions = {
+                                            from: 'KrissAdmin@matcha.com',
+                                            to: register.email,
+                                            subject: 'Matcha Registration',
+                                            text: 'Congratulations for signing up to our Matcha website,\nGo to the following link http://localhost:3000/verification and enter te following code to complete registration:\n' + code
+                                        };
+                                        
+                                        var key = encryption(register.username);
+                                        sql = "INSERT INTO `matcha`.`profiles` (`unique_key`, `user_name`, `first_name`, `last_name`) VALUES (?, ?, ?, ?)";
+                                        con.query(sql, [key, register.username, register.firstname, register.lastname], function(err, result){
+                                            if (err){
+                                                console.log(err);
+                                            } else {
+                                                console.log("User Initial Profile Complete");
+                                                transporter.sendMail(mailOptions, function(error, info){
+                                                    if (error) {
+                                                        console.log(error);
+                                                    } else {
+                                                        console.log('Email sent: ' + info.response);
+                                                        callback(null, "pass");
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
                             }
-                        });
+                        });   
                     }
-                });
-                
-            }
+                }
+            })
         }
     });
 }
@@ -337,4 +360,12 @@ module.exports.mailman = function(data, callback){
             callback(null, "sent");
         }
     });
+}
+
+module.exports.gimme_gimme = function (request, callback){
+    if (request){
+        
+    } else {
+        callback("no_request", null);
+    }
 }

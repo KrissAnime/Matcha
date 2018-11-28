@@ -1,0 +1,59 @@
+<% include partials/head %>
+<header>
+        <%- include('partials/header', {session: session}); %>
+
+</header>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <!-- <div class="container" id="finish_registration">
+        <form>
+                <label>Age </label>
+                <input onchange="check_them()"  type="number" id="user_age" name="user_age" placeholder="Age" min="18" max="60"><br>
+                <label>Gender </label>            
+                <select onchange="check_them()" id="gender" name="gender" style="float: right">
+                    <option></option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select><br>
+                <label>Sexual Orientation </label>            
+                <select onchange="check_them()" id="sexual_pref" name="sexual_pref" style="float: right">
+                    <option></option>
+                    <option>Straight</option>
+                    <option>Lesbian</option>
+                    <option>Gay</option>
+                    <option>Bisexual</option>
+                </select><br>
+                <label>Tag 1 </label>
+                <select onchange="check_them()" id="tag1_select" name="tag1_select" style="float: right">
+                <option></option>
+                    <% tags.forEach(function(tag){ %>
+                        <option><%= tag.tag_name %></option>
+                    <% }) %>
+                </select><br>
+                <label>Tag 2 </label>
+                <select onchange="check_them()" id="tag2_select" name="tag2_select" style="float: right">
+                <option></option>
+                    <% tags.forEach(function(tag){ %>
+                        <option><%= tag.tag_name %></option>
+                    <% }) %>
+                </select><br>
+                <label>Tag 3 </label>
+                <select onchange="check_them()" id="tag3_select" name="tag3_select" style="float: right">
+                <option></option>
+                    <% tags.forEach(function(tag){ %>
+                        <option><%= tag.tag_name %></option>
+                    <% }) %>
+                </select><br>
+            <div class="form-group">
+              <label>Bio </label>
+              <input type="text" class="form-control" id="bio_box" placeholder="Say something about yourself">
+            </div>
+            <button type="submit" class="btn btn-primary" id="finish_this_button" disabled>Submit</button>
+          </form> -->
+    </div>
+    <script src="/js/registration.js">
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4cJ_DoiJtOI8I0Hx7tMQ8VGbrl5ImH3E&libraries=places&callback=initAutocomplete"
+    async defer></script>
+
+<% include partials/footer %>

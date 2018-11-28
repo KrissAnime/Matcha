@@ -192,18 +192,18 @@ app.get('/profile', function (req, res) {
                 result[0].bio = escapeHtmlReverse(result[0].bio);
                 var user_key = result[0].unique_key;
                 sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = ?";
-                        con.query(sql, [user_key], function (err, result2) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                res.render('profile', {
-                                    images: result2,
-                                    users: result,
-                                    session: req.session.username
-                                });
-                            }
-                        })
+                con.query(sql, [user_key], function (err, result2) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else {
+                        res.render('profile', {
+                            images: result2,
+                            users: result,
+                            session: req.session.username
+                        });
+                    }
+                })
             }
         });
     } else {
@@ -345,7 +345,7 @@ app.get('/messaging/:unique_key', function (req, res, next) {
 //Editing page
 app.get('/editing:unique_key', function(req, res, next){
     if (req.session.username){
-
+        res.render('./editing')
     } else {
         res.redirect('/')
     }
@@ -373,14 +373,14 @@ app.post('/login', function (req, res) {
         password: req.body.password
     }
     functions.log_me_in(data, function (err, resp) {
-        // monitor = req.session;
         var empty = "";
         var error = "invalid";
         var regis = "incomplete";
         if (resp == '0') {
             res.render('./login', { result: error, session: empty });
         } else if (resp == '2'){
-            res.render('./login', { result: regis, session: empty });
+            req.session.hidden = functions.encryption(req.body.username)
+            res.redirect('/register_completion');
         }
         else {
             req.session.username = req.body.username;
@@ -388,6 +388,42 @@ app.post('/login', function (req, res) {
             res.redirect('/');
         }
     })
+});
+
+app.get('/register_completion', function(req, res){
+    if (req.session.hidden){
+        sql = "SELECT `user_name` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+        con.query(sql, [req.session.hidden], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0]){
+                    var empty = "";
+                    sql2 = "SELECT `tag_name` FROM `matcha`.`tags`";
+                    con.query(sql2, function(err, result2){
+                        if (err){
+                            console.log(err);
+                        } else {
+                            res.render('register_completion',
+                            {
+                                session: empty,
+                                name: result[0].user_name,
+                                tags: result2
+                            });
+                        }
+                    })
+                }
+            }
+        });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.post('/register_completion', function(req, res){
+    if (req.session.hidden){
+        
+    }
 });
 
 //Registration
@@ -420,7 +456,7 @@ app.post('/registration', function (req, res) {
 //Verification Page
 app.get('/verification', function (req, res) {
     data = "";
-    res.render('verification');
+    res.render('verification', {data: data, session: data});
 })
 
 app.post('/verification', function (req, res) {

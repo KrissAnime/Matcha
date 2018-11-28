@@ -9,13 +9,11 @@
         <label for="username">Username:</label> <input type="text" size="30" id="username" maxlength="30" name="username" placeholder="Username..."><br/>
         <label for="password">Password:</label> <input type="password" size="30" id="password" name="password" maxlength="30" placeholder="Password..."><br/><br/>
         <button type="submit" id="login">Login</button>
-        <h6>New Account? <a href="../../registration">Register</a> Here!</h6>
+        <h6 style="text-align: center">New Account? <a href="../../registration">Register</a> Here!</h6>
     </form>
     <% if (result){
         if (result == "invalid"){ %>
             <h6 style="text-align: center">Invalid Login Details</h6>
-        <% } else { %>
-            <h6 style="text-align: center">Incomplete Registration <a href="../../register_completion">Click here</a> Complete It</h6>
         <% }
     } %>
 </div>

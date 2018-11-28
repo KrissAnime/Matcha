@@ -219,19 +219,19 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`profiles`";
-sql += "(`user_id` INT(6) NOT NULL PRIMARY KEY ,";
+sql += "(`user_id` INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY ,";
 sql += " `unique_key` VARCHAR(255) NOT NULL ,";
-sql += " `profile` VARCHAR(60) NOT NULL ,";
+sql += " `profile` VARCHAR(60) ,";
 sql += " `first_name` VARCHAR(30) NOT NULL ,";
 sql += " `last_name` VARCHAR(30) NOT NULL ,";
 sql += " `user_name` VARCHAR(50) NOT NULL ,";
 sql += " `fame_rating` INT(1) DEFAULT '0' ,";
-sql += " `age` INT(2) NOT NULL ,";
-sql += " `gender` INT(1) NOT NULL ,";
-sql += " `sexual_pref` INT(1) NOT NULL ,";
-sql += " `location` VARCHAR(200) NOT NULL ,";
-sql += " `bio` VARCHAR(1500) NOT NULL ,";
-sql += " `interests` VARCHAR(1000) NOT NULL) ENGINE = InnoDB";
+sql += " `age` INT(2) ,";
+sql += " `gender` INT(1) ,";
+sql += " `sexual_pref` INT(1) ,";
+sql += " `location` VARCHAR(200) ,";
+sql += " `bio` VARCHAR(1500) ,";
+sql += " `interests` VARCHAR(1000)) ENGINE = InnoDB";
 con.query(sql, function (err, result) {
   if (err){
     console.log(err);
@@ -362,6 +362,7 @@ function escapeHtml(unsafe) {
   .replace(/'/g, "&#039;");
 }
 
+
 var x = 0;
 for (const item of users){
   var pass = encryption(item.password);
@@ -410,8 +411,8 @@ for (const item of users){
     }    
   });
   sql = "INSERT INTO `matcha`.`users` ";
-  sql += "(`user_id`, `user_name`, `email`, `password`, `verified`, `profile`)";
-  sql += " VALUES ('" + (x + 1) +  "', '" + user_name + "', '" + email + "', '";
+  sql += "(`user_name`, `email`, `password`, `verified`, `profile`)";
+  sql += " VALUES ('" + user_name + "', '" + email + "', '";
   sql += pass + "', '1" + "', '" + profile + "')";
   con.query(sql, function (err, result) {
     if (err){
@@ -423,9 +424,9 @@ for (const item of users){
   });
   
   sql = "INSERT INTO `matcha`.`profiles` ";
-  sql += "(`user_id`, `unique_key`, `profile`, `first_name`, `last_name`, `user_name`, `fame_rating`, `age`, `gender`, ";
+  sql += "(`unique_key`, `profile`, `first_name`, `last_name`, `user_name`, `fame_rating`, `age`, `gender`, ";
   sql +=  "`sexual_pref`, `bio`, `interests`)";
-  sql += " VALUES ('" + (x + 1) + "', '" + unique_key + "', '"  + profile + "', '" + first_name + "', '" + last_name + "', '";
+  sql += " VALUES ('" + unique_key + "', '"  + profile + "', '" + first_name + "', '" + last_name + "', '";
   sql += user_name +  "', '" + fame_rating + "', '" + age + "', '";
   sql += gender +  "', '" + sexual_pref + "', '" + bio + "', '" + interests + "')";
   con.query(sql, function (err, result) {
