@@ -43,23 +43,10 @@
                             <td><%= user.age %></td>
                         </tr>
                         <tr>
-                            <td>Gender: </td>
-                            <% if (user.gender == 1){ %>
-                                <td>Female</td>
-                            <% }else{ %>
-                                <td>Male</td>
-                            <% } %>
+                            <td><%= user.gender %> </td>
                         </tr>
                             <tr>
-                            <% if(user.sexual_pref == 0) {%>
-                                <td>Straight</td>
-                            <% }else if (user.sexual_pref == 1) { %>
-                                <td>Bisexual</td>
-                            <% }else if (user.sexual_pref == 2) { %>
-                                <td>Gay</td>
-                            <% }else { %>
-                                <td>Lesbian</td>
-                            <% } %>
+                                <td><%= user.sexual_pref %></td>
                             <td></td>
                         </tr>
                     </table>       

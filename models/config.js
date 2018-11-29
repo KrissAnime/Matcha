@@ -202,7 +202,7 @@ con.connect(function(err) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`users`";
-sql += "(`user_id` INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY ,";
+sql += "(`unique_key` VARCHAR(255) NOT NULL PRIMARY KEY ,";
 sql += " `user_name` VARCHAR(50) NOT NULL ,";
 sql += " `email` VARCHAR(50) NOT NULL ,";
 sql += " `password` VARCHAR(255) NOT NULL,";
@@ -219,17 +219,17 @@ con.query(sql, function (err, result) {
 });
 
 sql = "CREATE TABLE IF NOT EXISTS `matcha`.`profiles`";
-sql += "(`user_id` INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY ,";
-sql += " `unique_key` VARCHAR(255) NOT NULL ,";
+sql += "(`unique_key` VARCHAR(255) NOT NULL PRIMARY KEY,";
 sql += " `profile` VARCHAR(60) ,";
 sql += " `first_name` VARCHAR(30) NOT NULL ,";
 sql += " `last_name` VARCHAR(30) NOT NULL ,";
 sql += " `user_name` VARCHAR(50) NOT NULL ,";
 sql += " `fame_rating` INT(1) DEFAULT '0' ,";
 sql += " `age` INT(2) ,";
-sql += " `gender` INT(1) ,";
-sql += " `sexual_pref` INT(1) ,";
-sql += " `location` VARCHAR(200) ,";
+sql += " `gender` VARCHAR(7) ,";
+sql += " `sexual_pref` VARCHAR(10) ,";
+sql += " `location_lat` FLOAT(10,6) ,";
+sql += " `location_long` FLOAT(10,6) ,";
 sql += " `bio` VARCHAR(1500) ,";
 sql += " `interests` VARCHAR(1000)) ENGINE = InnoDB";
 con.query(sql, function (err, result) {
@@ -411,8 +411,8 @@ for (const item of users){
     }    
   });
   sql = "INSERT INTO `matcha`.`users` ";
-  sql += "(`user_name`, `email`, `password`, `verified`, `profile`)";
-  sql += " VALUES ('" + user_name + "', '" + email + "', '";
+  sql += "(`unique_key`, `user_name`, `email`, `password`, `verified`, `profile`)";
+  sql += " VALUES ('" + unique_key + "', '" + user_name + "', '" + email + "', '";
   sql += pass + "', '1" + "', '" + profile + "')";
   con.query(sql, function (err, result) {
     if (err){

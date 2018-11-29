@@ -1,27 +1,7 @@
-// var age = document.getElementById('user_age');
-// var sexual_pref = document.getElementById('sexual_pref');
-// var gender = document.getElementById('gender');
-// var tag1_select = document.getElementById('tag1_select');
-// var tag2_select = document.getElementById('tag2_select');
-// var tag3_select = document.getElementById('tag3_select');
-// var finish = document.getElementById('finish_this_button');
-
-// function check_them(){
-//     console.log(age.value);
-//     console.log(sexual_pref.value);
-//     console.log(gender.value);
-//     console.log(tag1_select.value);
-//     console.log(tag2_select.value);
-//     console.log(tag3_select.value);
-//     console.log(check_me.disabled);
-//     if (age.value && sexual_pref.value && gender.value && tag1_select.value && tag2_select.value && tag3_select.value){
-//         finish.disabled = false;
-//     }
-// }
 
 function initAutocomplete() {
     var map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: -33.8688, lng: 151.2195},
+      center: {lat: -26.2041, lng: 28.0473},
       zoom: 13,
       mapTypeId: 'roadmap'
     });
@@ -41,6 +21,11 @@ function initAutocomplete() {
     // more details for that place.
     searchBox.addListener('places_changed', function() {
       var places = searchBox.getPlaces();
+      var longitude = document.getElementById('coord_long');
+      var latitude = document.getElementById('coord_lat');
+
+      longitude.value = places[0].geometry.location.lng();
+      latitude.value = places[0].geometry.location.lat();
 
       if (places.length == 0) {
         return;

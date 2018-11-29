@@ -1,7 +1,9 @@
-var mysql = require('mysql');
+const mysql = require('mysql');
 const crypto = require('crypto');
-var nodemailer = require('nodemailer');
-var geoip = require('geoip-lite');
+const nodemailer = require('nodemailer');
+const geoip = require('geoip-lite');
+const publicIp = require('public-ip');
+
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -10,6 +12,22 @@ var transporter = nodemailer.createTransport({
         pass: 'lifeisahighway18'
     }
 });
+
+function twin(user_tag){
+    var max = user_tag.length;
+    var start = 0;
+    var next = 1;
+    
+    user_tag.sort();
+    while (next <= max){
+        if (user_tag[start] == user_tag[next]){
+            user_tag[next] = "NULL";
+        }
+        start++;
+        next++;
+    }
+    return user_tag;
+}
 
 function escapeHtmlReverse(unsafe) {
     return unsafe
@@ -113,6 +131,30 @@ module.exports.verification_code = function(data, callback){
     });
 }
 
+function check_distance(distance, element, me){
+    if (distance == "50+"){
+        var min_distance = 50;
+        var max_distance = 50000;
+    } else {
+        distance = distance.split("-");
+        var min_distance = Number(distance[0]);
+        var max_distance = Number(distance[1]);
+    }
+    var x = Math.pow((me.long * 70) - (element.location_long * 70), 2);
+    var y = Math.pow((me.lat * 70) - (element.location_lat * 70), 2)
+    var true_dist = Math.sqrt(x + y);
+    var check = 0;
+    if (true_dist >= min_distance && true_dist <= max_distance){
+        check = 1;
+    }
+    if (!check){
+        element.unique_key = "NULL";
+        return element;
+    } else {
+        return element;
+    }
+}
+
 function check_age(age_low, age_max, element){
     var temp = 0;    
     if (element.age >= age_low && element.age <= age_max){
@@ -173,6 +215,28 @@ function check_blocker(element, result3){
     }
 }
 
+function check_lover(element, lovers){
+    var temp = 1;
+    if (lovers.gender == "Male" && lovers.sexual_pref == "Men" && element.gender == "Female"){
+        temp = 0;
+    }
+    if (lovers.gender == "Male" && lovers.sexual_pref == "Female" && element.gender == "Men"){
+        temp = 0;
+    }
+    if (lovers.gender == "Female" && lovers.sexual_pref == "Men" && element.gender == "Female"){
+        temp = 0;
+    }
+    if (lovers.gender == "Female" && lovers.sexual_pref == "Female" && element.gender == "Men"){
+        temp = 0;
+    }
+    if (!temp){
+        element.unique_key = "NULL";
+        return element;
+    } else {
+        return element;
+    }
+}
+
 module.exports.search_and_recover = function (data, callback){
     
     if(!data.age_low || data.age_low < 18){
@@ -217,26 +281,48 @@ module.exports.search_and_recover = function (data, callback){
                         if (err2){
                             console.log(err2);
                         } else {
-                            result.forEach(element => {
-                                if (result3[0]){
-                                    element = check_blocker(element, result3);
+                            sql4 = "SELECT `location_lat`, `location_long`, `sexual_pref`, `gender` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+                            con.query(sql4, [data.blocker_key], function(err4, result4){
+                                if (err4){
+                                    console.log(err4);
+                                } else {
+                                    var me = {
+                                        long: result4[0].location_long,
+                                        lat: result4[0].location_lat,
+                                    }
+                                    var lovers = {
+                                        sexual_pref: result4[0].sexual_pref,
+                                        gender: result4[0].gender
+                                    }
+                                    result.forEach(element => {
+                                        if (result3[0]){
+                                            element = check_blocker(element, result3);
+                                        }
+                                        element = check_age(data.age_low, data.age_max, element);
+                                        element = check_lover(element, lovers);
+                                        if (data.rating != -1){
+                                            element = check_fame(data.rating, element);
+                                        }
+                                        if (data.tag_1 != -1){
+                                            element = check_tag(data.tag_1, result2, element);
+                                        }
+                                        if (data.tag_2 != -1){
+                                            element = check_tag(data.tag_2, result2, element);                    
+                                        }
+                                        if (data.tag_3 != -1){
+                                            element = check_tag(data.tag_3, result2, element);                         
+                                        }
+                                        if (data.distance != -1){
+                                            element = check_distance(data.distance, element, me);
+                                        }
+                                        if (element.bio){
+                                            element.bio = escapeHtmlReverse(element.bio);
+                                        }
+                                    });
+                                    callback(null, result);
                                 }
-                                element = check_age(data.age_low, data.age_max, element);
-                                if (data.rating != -1){
-                                    element = check_fame(data.rating, element);
-                                }
-                                if (data.tag_1 != -1){
-                                    element = check_tag(data.tag_1, result2, element);
-                                }
-                                if (data.tag_2 != -1){
-                                    element = check_tag(data.tag_2, result2, element);                    
-                                }
-                                if (data.tag_3 != -1){
-                                    element = check_tag(data.tag_3, result2, element);                         
-                                }
-                                element.bio = escapeHtmlReverse(element.bio);
-                            });
-                            callback(null, result);
+                            })
+                            
                         }
                     })
                 }
@@ -274,10 +360,11 @@ module.exports.registration_input = function (register, callback){
                     if (exists){
                         callback("exists", null);
                     } else {
+                        var uni_key = encryption(register.username);
                         var pass = encryption(register.password);
-                        sql = "INSERT INTO `matcha`.`users` (`user_name`, `email`, `password`, `verified`)";
-                        sql += "VALUES (?, ?, ?, '0');";
-                        con.query(sql, [register.username, register.email, pass], function(err, result){
+                        sql = "INSERT INTO `matcha`.`users` (`unique_key`, `user_name`, `email`, `password`, `verified`)";
+                        sql += "VALUES (?, ?, ?, ?, '0');";
+                        con.query(sql, [uni_key ,register.username, register.email, pass], function(err, result){
                             if (err){
                                 console.log(err);
                             } else {
@@ -364,8 +451,48 @@ module.exports.mailman = function(data, callback){
 
 module.exports.gimme_gimme = function (request, callback){
     if (request){
-        
+        con.qu
     } else {
         callback("no_request", null);
     }
+}
+
+module.exports.check_my_registration = function (reg_me, callback){
+    var errors = {
+        essential: "",
+        tags: "",
+    };
+    if (!reg_me.age || !reg_me.gender || !reg_me.sexual_pref){
+        errors.essential = "essentials";
+        callback(errors, null);
+    }
+    if (!reg_me.tag_1 || !reg_me.tag_2 || !reg_me.tag_3){
+        errors.tags = "tags";
+        callback(errors, null);
+    }
+    if (!reg_me.long || !reg_me.lat){
+        publicIp.v4().then(ip => {
+            var geo = geoip.lookup(ip);
+            reg_me.long = geo.ll[1];
+            reg_me.lat = geo.ll[1];
+        });
+    }
+    var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
+    var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
+    con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
+        if (err){
+            console.log(err);
+        } else {
+            console.log('User profile table updated succesfully');
+            sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
+            con.query(sql2, [reg_me.key], function(err2, res2){
+                if (err2){
+                    console.log(err2);
+                } else {
+                    console.log('User verification succesful');
+                    callback(null, "success");
+                }
+            })
+        }
+    });
 }

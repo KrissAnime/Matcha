@@ -59,7 +59,6 @@ con.query(sql, function (err, result) {
                 }
             });
         });
-        // console.log(tag_list);
         tag_list = tag_list.split(",");
         tag_list = twin(tag_list);
         var max = tag_list.length - 1;

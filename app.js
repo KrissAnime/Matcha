@@ -14,6 +14,8 @@ const session = require('express-session');
 const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 const socket = require('socket.io');
+const publicIp = require('public-ip');
+const geoip = require('geoip-lite');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -379,7 +381,8 @@ app.post('/login', function (req, res) {
         if (resp == '0') {
             res.render('./login', { result: error, session: empty });
         } else if (resp == '2'){
-            req.session.hidden = functions.encryption(req.body.username)
+            req.session.hidden = functions.encryption(req.body.username);
+            req.session.hidden_two = req.body.username;
             res.redirect('/register_completion');
         }
         else {
@@ -407,8 +410,10 @@ app.get('/register_completion', function(req, res){
                             res.render('register_completion',
                             {
                                 session: empty,
+                                error: empty,
                                 name: result[0].user_name,
-                                tags: result2
+                                tags: result2,
+                                hide_me: req.session.hidden
                             });
                         }
                     })
@@ -422,7 +427,53 @@ app.get('/register_completion', function(req, res){
 
 app.post('/register_completion', function(req, res){
     if (req.session.hidden){
-        
+        var reg_me = {
+            age: req.body.user_age,
+            gender: req.body.gender,
+            sexual_pref: req.body.sexual_pref,
+            tag_1: req.body.tag1_select,
+            tag_2: req.body.tag2_select,
+            tag_3: req.body.tag3_select,
+            long: req.body.coord_long,
+            lat: req.body.coord_lat,
+            bio: req.body.bio_box, 
+            key: req.session.hidden,
+        };
+        console.log(req.body);
+        sql = "SELECT `user_name` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+        con.query(sql, [req.session.hidden], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0]){
+                    sql2 = "SELECT `tag_name` FROM `matcha`.`tags`";
+                    con.query(sql2, function(err, result2){
+                        if (err){
+                            console.log(err);
+                        } else {
+                            functions.check_my_registration(reg_me, function (error, resp){
+                                var empty = "";
+                                if (error){
+                                    res.render('./register_completion',
+                                    {
+                                        error: error,
+                                        session: empty,
+                                        name: result[0].user_name,
+                                        tags: result2,
+                                        hide_me: req.session.hidden
+                                    });
+                                } else {
+                                    req.session.hidden = "";
+                                    req.session.username = req.session.hidden_two;
+                                    req.session.hidden_two = "";
+                                    res.redirect('/');
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
     }
 });
 
