@@ -230,6 +230,7 @@ sql += " `gender` VARCHAR(7) ,";
 sql += " `sexual_pref` VARCHAR(10) ,";
 sql += " `location_lat` FLOAT(10,6) ,";
 sql += " `location_long` FLOAT(10,6) ,";
+sql += " `distance` INT(10) DEFAULT '0' ,";
 sql += " `bio` VARCHAR(1500) ,";
 sql += " `interests` VARCHAR(1000)) ENGINE = InnoDB";
 con.query(sql, function (err, result) {

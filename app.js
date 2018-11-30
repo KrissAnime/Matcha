@@ -14,8 +14,7 @@ const session = require('express-session');
 const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 const socket = require('socket.io');
-const publicIp = require('public-ip');
-const geoip = require('geoip-lite');
+const jwt = require('jsonwebtoken');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -140,7 +139,7 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                 console.log(err);
                             }
                             else {
-                                sql4 = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = ?";
+                                sql4 = "SELECT `unique_key`, `email` FROM `matcha`.`users` WHERE `user_name` = ?";
                                 con.query(sql4, [req.session.username], function(err, result4){
                                     if (err){
                                         console.log(err);
@@ -157,14 +156,25 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                                 } else {
                                                     var rate = 0;
                                                 }
-                                                res.render('profiles',
-                                                {
-                                                    users: result,
-                                                    images: result2,
-                                                    session: req.session.username,
-                                                    rating: rate, 
-                                                    hidden_key: req.params.unique_key
-                                                });
+                                                var data = {
+                                                    email: result4[0].email,
+                                                    text: result[0].user_name + " visited your profile.\nYou can visit their profile here http://localhost:3000/profiles/" + my_key,
+                                                    subject: "Matcha Visitation"
+                                                }
+                                                functions.mailman(data, function(call_err, resp){
+                                                    if (call_err){
+                                                        console.log(call_err);
+                                                    } else {
+                                                        res.render('profiles',
+                                                        {
+                                                            users: result,
+                                                            images: result2,
+                                                            session: req.session.username,
+                                                            rating: rate, 
+                                                            hidden_key: req.params.unique_key
+                                                        });
+                                                    }
+                                                })
                                             }
                                         });
                                     }
@@ -570,6 +580,7 @@ app.get('/search', function (req, res) {
                         }
                     }
                     if (data) {
+
                         functions.search_and_recover(data, function (call_err, resp) {
                             if (call_err) {
                                 console.log(call_err);

@@ -132,9 +132,9 @@ module.exports.verification_code = function(data, callback){
 }
 
 function check_distance(distance, element, me){
-    if (distance == "50+"){
+    if (distance == "300+"){
         var min_distance = 50;
-        var max_distance = 50000;
+        var max_distance = 500000;
     } else {
         distance = distance.split("-");
         var min_distance = Number(distance[0]);
@@ -270,31 +270,33 @@ module.exports.search_and_recover = function (data, callback){
         if (err3){
             console.log(err2);
         } else {
-            sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "'";
-            con.query(sql, function(err, result){
+            sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` == ?";
+            con.query(sql, [data.user], function(err, result){
                 if (err){
                     console.log(err);
                 }
                 else{
+                    var me = {
+                        long: result[0].location_long,
+                        lat: result[0].location_lat,
+                    }
+                    var lovers = {
+                        sexual_pref: result[0].sexual_pref,
+                        gender: result[0].gender
+                    }
                     sql2 = "SELECT `tag_name`, `unique_key` FROM `matcha`.`user_tags`";
                     con.query(sql2, function(err2, result2){
                         if (err2){
                             console.log(err2);
                         } else {
-                            sql4 = "SELECT `location_lat`, `location_long`, `sexual_pref`, `gender` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
-                            con.query(sql4, [data.blocker_key], function(err4, result4){
+                            sql4 = "SELECT *, (ABS(ACOS(SIN(`location_lat`)*SIN(?)+COS(`location_lat`)*COS(?)*COS(?-`location_long`))) * 3960) / 1.60934 `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `distance`";
+                            // sql4 = "SELECT `location_lat`, `location_long`, `sexual_pref`, `gender` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+                            con.query(sql4, [me.lat, me.lat, me.long], function(err4, result4){
                                 if (err4){
                                     console.log(err4);
                                 } else {
-                                    var me = {
-                                        long: result4[0].location_long,
-                                        lat: result4[0].location_lat,
-                                    }
-                                    var lovers = {
-                                        sexual_pref: result4[0].sexual_pref,
-                                        gender: result4[0].gender
-                                    }
-                                    result.forEach(element => {
+                                    
+                                    result4.forEach(element => {
                                         if (result3[0]){
                                             element = check_blocker(element, result3);
                                         }
@@ -319,7 +321,7 @@ module.exports.search_and_recover = function (data, callback){
                                             element.bio = escapeHtmlReverse(element.bio);
                                         }
                                     });
-                                    callback(null, result);
+                                    callback(null, result4);
                                 }
                             })
                             
@@ -462,7 +464,7 @@ module.exports.check_my_registration = function (reg_me, callback){
         essential: "",
         tags: "",
     };
-    if (!reg_me.age || !reg_me.gender || !reg_me.sexual_pref){
+    if (!reg_me.age || !reg_me.gender || !reg_me.sexual_pref || reg_me.age < 18 || reg_me.age > 60){
         errors.essential = "essentials";
         callback(errors, null);
     }
