@@ -10,7 +10,13 @@
 			<div id='modal_image'>
 			</div>
 			<br/>
-	</div>
+    </div>
+        <%= typeof msg != 'undefinded ? msg : '' %>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input name="user_image" type="file">
+        <input type="hidden" name="unique_key" value="<%= result[0].unique_key %>">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 </div>
 
 <div class="user_profiles">

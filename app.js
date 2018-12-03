@@ -15,6 +15,8 @@ const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 const socket = require('socket.io');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const mkdirp = require('mkdirp');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -373,6 +375,103 @@ app.get('/logout', function (req, res) {
     })
 })
 
+//Forgotten Password
+app.get('/forgotten', function (req, res){
+    res.render('./forgotten',
+    {
+        error: "",
+        session: ""
+    });
+});
+
+app.post('/forgotten', function (req, res){
+    functions.forget_me(req.body.email, function (err, resp){
+        if (err){
+            res.render('./forgotten',
+            {
+                session: "",
+                error: err
+            });
+        } else {
+            res.render('./forgotten',
+            {
+                session: "",
+                error: "Success"
+            });
+        }
+    });
+});
+
+app.get('/reset_2/:code', function(req, res, next){
+    data = {
+        code: req.params.code
+    }
+    functions.check_reset(data, function(err, resp){
+        if (err){
+            next();
+        } else {
+            res.render('./reset_2',
+            {
+                session: "",
+                error: "",
+            });
+        }
+    });
+});
+
+app.post('/reset_2', function(req, res){
+    data = {
+        email: req.body.email,
+        password: req.body.password,
+        mpassword: req.body.mpassword,
+    }
+    functions.update_password(data, function(err, resp){
+        console.log(err);
+        console.log(resp);
+        if (err){
+            res.render('./reset_2',
+            {
+                session: "",
+                error: err,
+            });
+        } else {
+            res.redirect('/');
+        }
+    });
+})
+
+//Resetting Password
+app.get('/reset', function (req, res){
+    res.render('./reset',
+    {
+        error: "",
+        session: "",
+    });
+});
+
+app.post('/reset', function (req, res){
+    data = {
+        email: req.body.email,
+        code: req.body.code,
+    }
+    functions.check_reset(data, function(err, resp){
+        if (err){
+            res.render('./reset',
+            {
+                error: err,
+                session: "",
+            });
+        } else {
+            req.session.key = "Valid";
+            res.render('./reset',
+            {
+                error: err,
+                session: "",
+            });
+        }
+    }); 
+});
+
 //Login Page
 app.get('/login', function (req, res) {
     err = "";
@@ -390,15 +489,21 @@ app.post('/login', function (req, res) {
         var regis = "incomplete";
         if (resp == '0') {
             res.render('./login', { result: error, session: empty });
-        } else if (resp == '2'){
-            req.session.hidden = functions.encryption(req.body.username);
-            req.session.hidden_two = req.body.username;
-            res.redirect('/register_completion');
-        }
-        else {
-            req.session.username = req.body.username;
-            console.log(req.session.username + " Logged In");
-            res.redirect('/');
+        } else {
+            var user = {
+                
+            }
+            jwt.sign({});
+            if (resp == '2'){
+                req.session.hidden = functions.encryption(req.body.username);
+                req.session.hidden_two = req.body.username;
+                res.redirect('/register_completion');
+            }
+            else {
+                req.session.username = req.body.username;
+                console.log(req.session.username + " Logged In");
+                res.redirect('/');
+            }
         }
     })
 });
@@ -473,6 +578,13 @@ app.post('/register_completion', function(req, res){
                                         hide_me: req.session.hidden
                                     });
                                 } else {
+                                    mkdirp('./public/extra/profiles/' + req.session.hidden_two, function(err){
+                                        if (err){
+                                            console.log(err);
+                                        } else {
+                                            console.log('Folder Created For New User');
+                                        }
+                                    })
                                     req.session.hidden = "";
                                     req.session.username = req.session.hidden_two;
                                     req.session.hidden_two = "";
@@ -580,7 +692,7 @@ app.get('/search', function (req, res) {
                         }
                     }
                     if (data) {
-
+                        
                         functions.search_and_recover(data, function (call_err, resp) {
                             if (call_err) {
                                 console.log(call_err);
@@ -755,9 +867,53 @@ app.post('/like_me', function (req, res) {
     });
 });
 
+app.post('/upload', function(req, res){
+    if (req.session.username){
+        upload(req, res, (err) => {
+            if (err){
+                alert(err);
+            } else {
+                const storage = multer.diskStorage({
+                    destination: './public/extra/profiles/' + req.session.username,
+                    filename: function(req, file, callback){
+                        callback(null, req.session.username + '-' + Date.now() + path.extname(file.originalname));
+                    }
+                });
+                
+                // Init Upload
+                const upload = multer({
+                    storage: storage,
+                    limits: {fileSize: 5242880},
+                    fileFilter: function(req, file, callback){
+                        checkFileType(file, callback);
+                    }
+                }).single('new_image')
+                console.log(req.file);
+            }
+        })
+    } else {
+        res.redirect('/')
+    }
+});
+
 //For when users attempt an invalid or broken url
 app.use(function (req, res) {
     res.render('error');
 });
 
 
+
+//Check File Type
+function checkFileType(file, callback){
+    //Allowed ext
+    const filetypes = /jpeg|jpg|png/;
+    //Check ext
+    const extname  = filetypes.test(path.extname(file.originalname).toLowerCase());
+    //Check mime
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype && extname){
+        return callback(null, true);
+    } else {
+        callback('Error: Images Only!');
+    }
+}

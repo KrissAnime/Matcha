@@ -4,6 +4,23 @@ const nodemailer = require('nodemailer');
 const geoip = require('geoip-lite');
 const publicIp = require('public-ip');
 
+function mailman(data, callback){
+    var mailOptions = {
+        from: 'KrissAdmin@matcha.com',
+        to: data.email,
+        subject: data.subject,
+        text: data.text
+    };
+    
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+            callback(null, "sent");
+        }
+    });
+}
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -140,9 +157,7 @@ function check_distance(distance, element, me){
         var min_distance = Number(distance[0]);
         var max_distance = Number(distance[1]);
     }
-    var x = Math.pow((me.long * 70) - (element.location_long * 70), 2);
-    var y = Math.pow((me.lat * 70) - (element.location_lat * 70), 2)
-    var true_dist = Math.sqrt(x + y);
+    var true_dist = element.distance;
     var check = 0;
     if (true_dist >= min_distance && true_dist <= max_distance){
         check = 1;
@@ -270,7 +285,7 @@ module.exports.search_and_recover = function (data, callback){
         if (err3){
             console.log(err2);
         } else {
-            sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` == ?";
+            sql = "SELECT * FROM `matcha`.`profiles` WHERE `user_name` = ?";
             con.query(sql, [data.user], function(err, result){
                 if (err){
                     console.log(err);
@@ -289,8 +304,7 @@ module.exports.search_and_recover = function (data, callback){
                         if (err2){
                             console.log(err2);
                         } else {
-                            sql4 = "SELECT *, (ABS(ACOS(SIN(`location_lat`)*SIN(?)+COS(`location_lat`)*COS(?)*COS(?-`location_long`))) * 3960) / 1.60934 `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `distance`";
-                            // sql4 = "SELECT `location_lat`, `location_long`, `sexual_pref`, `gender` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+                            sql4 = "SELECT *, (ABS(ACOS(SIN((`location_lat` / 180 * 3.141592))*SIN((? / 180 * 3.141592))+COS((`location_lat` / 180 * 3.141592))*COS((? / 180 * 3.141592))*COS((? / 180 * 3.141592)-(`location_long` / 180 * 3.141592)))) * 6371) `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `distance`";
                             con.query(sql4, [me.lat, me.lat, me.long], function(err4, result4){
                                 if (err4){
                                     console.log(err4);
@@ -497,4 +511,92 @@ module.exports.check_my_registration = function (reg_me, callback){
             })
         }
     });
+}
+
+module.exports.forget_me = function(email, callback){
+    if (!email){
+        callback('Invalid', null);
+    } else {
+        sql = "SELECT `email`, `user_name` FROM `matcha`.`users` WHERE `email` = ? AND `verified` != 0";
+        con.query(sql, [email], function (err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0]){
+                    var number = (Math.floor(Math.random() * 1000) + 1) * (Math.floor(Math.random() * 100) + 1);
+                    var code = encryption(number.toString()).substr(8, 36);
+                    sql = "INSERT INTO `matcha`.`verification` (`email`, `code`) VALUES (?, ?)";
+                    con.query(sql, [email, code], function(err2, result2){
+                        if (err2){
+                            console.log(err2);
+                        } else {
+                            data = {
+                                subject: "Matcha Forgot Password",
+                                email: email,
+                                text: "Click on the following link\n\nhttp://localhost:3000/reset_2/" + code,
+                            }
+                            mailman(data, function(err, resp){
+                                if (err){
+                                    console.log(err); 
+                                } else {
+                                    console.log(resp);
+                                    callback(null, "Success");
+                                }
+                            })
+                        }
+                    });
+                } else {
+                    callback('Invalid', null);
+                }
+            }
+        });
+    }
+}
+
+module.exports.check_reset = function(data, callback){
+    if (!data.code){
+        callback("Invalid", null);
+    } else {
+        sql = "SELECT `email`, `code` FROM `matcha`.`verification` WHERE `code` = ?";
+        con.query(sql, [data.code], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0]){
+                    "DELETE FROM `matcha`.`verification` WHERE `code` = ?";
+                    con.query(sql, [data.code], function(err2, result2){
+                        if (err2){
+                            console.log(err2);
+                        } else {
+                            callback(null, "Success");
+                        }
+                    });
+                } else {
+                    callback("Invalid", null);
+                }
+            }
+        });
+    }
+}
+
+module.exports.update_password = function(data, callback){
+    if (!data.password || !data.mpassword || !data.email){
+        callback("Invalid", null);
+    } else {
+        data.password == encryption(data.password);
+        data.mpassword == encryption(data.mpassword);
+        if (data.password != data.mpassword){
+            callback("Invalid", null);
+        } else {
+            sql = "UPDATE `matcha`.`users` SET `password` = ?";
+            con.query(sql, [data.password], function(err, result){
+                if (err){
+                    console.log(err);
+                } else {
+                    console.log("User Details Updated");
+                    callback(null, "Success");
+                }
+            })
+        }
+    }
 }
