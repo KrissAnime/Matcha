@@ -11,9 +11,7 @@
         <button type="submit" id="login">Submit</button>
     </form>
     <% if (error){
-        if (error == "Invalid") { %>
-            <h6 style="text-align: center">Invalid Data</h6>
-    <% } %>
+        <h6 style="text-align: center"><%= error %></h6>
     <% } %>
 </div>
 

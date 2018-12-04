@@ -1,11 +1,17 @@
 <% include partials/head %>
 <header>
-        <%- include('partials/header', {session: session}); %>
-
+        <%- include('partials/header', {session: session}) %>
 </header>
-    <div class="container" id="finish_registration">
-        <form action="" method="POST">
-                <label>Age </label>
+
+<div class="container" id="registration_box">
+    <form action="" method="POST" id="registration_form" name="registration_form">
+        <label>First Name:</label> <input type="text" maxlength="30" size="30" id="firstname" name="firstname" placeholder="First Name..."><br/>
+        <label>Last Name:</label> <input type="text" maxlength="30" size="30" id="lastname" name="lastname" placeholder="Last Name..."><br/>
+        <label>Email:</label> <input type="text" size="30" maxlength="50" id="email" name="email" placeholder="Email..."><br/>
+        <label>Username:</label> <input type="text" size="30" maxlength="30" id="username" name="username" placeholder="Username..."><br/>
+        <label>Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="password" name="password" placeholder="Password..."><br/>
+        <label>Confirm Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="mpassword" name="mpassword" placeholder="Confirm Password..."><br/>
+        <label>Age </label>
                 <input  type="number" id="user_age" name="user_age" placeholder="Age" min="18" max="60"><br>
                 <label>Gender </label>            
                 <select id="gender" name="gender" style="float: right">
@@ -13,7 +19,7 @@
                     <option>Male</option>
                     <option>Female</option>
                 </select><br>
-                <label>Sexual Preference </label>            
+                <label>Sexual Orientation </label>            
                 <select id="sexual_pref" name="sexual_pref" style="float: right">
                     <option></option>
                     <option>Men</option>
@@ -45,24 +51,23 @@
               <label>Bio </label>
               <input type="text" class="form-control" id="bio_box" placeholder="Say something about yourself">
             </div>
-                <input type="hidden" name="hidden_key" id="hidden_key" value="<%= hide_me %>">
-                <input type="hidden" name="coord_long" id="coord_long" value="">
-                <input type="hidden" name="coord_lat" id="coord_lat" value="">
             <button type="submit" class="btn btn-primary" id="finish_this_button">Submit</button>
-            <% if (error){
-                if (error.essentials){ %>
-                    <h6>Essential data missing</h6>
-                <% }
-                if (error.tags){ %>
-                    <h6>You need to choose 3 tags</h6>
-                <% }
-            } %>
-        </form>
-    </div>
+    </form>
+    <!-- <% if (error){ %>
+        <% if (error == "missing") { %>
+            Incomplete Form
+            <% } %>
+        <% if (error == "mismatch") { %>
+            Passwords Do Not Match
+            <% } %>
+        <% if (error == "pass") { %>
+            Check email for verification code
+            <% } %>
+        <% if (error == "exists") { %>
+            Username or Email in use
+            <% } %>
+        <% } %> -->
 
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <div id="map"></div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4cJ_DoiJtOI8I0Hx7tMQ8VGbrl5ImH3E&libraries=places&callback=initAutocomplete" async defer></script>
-    <script src="/js/registration.js"></script>
-
-<% include partials/footer %>
+</div>
+            
+    <% include partials/footer %>

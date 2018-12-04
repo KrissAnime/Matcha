@@ -8,9 +8,11 @@
 	<div id='image_box'>
 		<span class='close' style='color: white'>&times;</span>
 			<div id='modal_image'>
-			</div>
+            </div>
+            
 			<br/>
-	</div>
+    </div>
+    
 </div>
 
 <div class="user_profiles">
@@ -51,51 +53,67 @@
                             <% } %>
                         </tr>
                             <tr>
-                                <td><%= user.sexual_pref %></td>
+                                Interested in: <td><%= user.sexual_pref %></td>
                             <td></td>
                         </tr> 
                     </table>
-                    <a href="../../messaging/<%= hidden_key %>" ><button type="button" class="btn btn-secondary">Chat Now!</button> </a>                     
+                    <% if (likeable){ %>
+                        <a href="../../messaging/<%= hidden_key %>" ><button type="button" class="btn btn-secondary">Chat Now!</button> </a>                     
+                    <% } %>
             </div>
                                         <div id="user_other_details">
                                             <div id="container" style="padding: 10px; color: white">
-                                                <p id="user_other_about_me_text"><%= user.bio %></p>
+                                                <% if (user.bio){ %>
+                                                    <p id="user_other_about_me_text"><%= user.bio %></p>
+                                                <% } %>
                                             </div>
-                                            <div class="btn-group" style="margin: auto; margin-left: 43%">
-                                                <button id="like_button" type="button" class="btn btn-success">Like</button>
-                                                <button id="block_button" type="button" class="btn btn-danger">Block</button>
-                                            </div>
-                                            
-                                            <div id="panel-warning" style="margin-left: 43.5%; color: yellow">
-                                                <% if (rating) {
-                                                    for (var i = 0; i < rating; i++){ %>
-                                                        <i id="profile_hearts<%= i + 1 %>" class="fas fa-star"></i>
-                                                        <% } 
-                                                        while (i < 5){ %>
-                                                            <i id="profile_hearts<%= i + 1 %>" class="far fa-star"></i>
-                                                            <% i++;
-                                                        } 
-                                                    } else { %>
-                                                        <i id="profile_heart1" class="far fa-star" stule="width: 12px;"></i>
-                                                        <i id="profile_heart2" class="far fa-star" stule="width: 12px;"></i>
-                                                        <i id="profile_heart3" class="far fa-star" stule="width: 12px;"></i>
-                                                        <i id="profile_heart4" class="far fa-star" stule="width: 12px;"></i>
-                                                        <i id="profile_heart5" class="far fa-star" stule="width: 12px;"></i>
-                                                        <% } %>
-                                                    </div>
-                                                    
+                                            <% if (control){ %>
+                                                <div class="btn-group" style="margin: auto; margin-left: 43%">
+                                                    <form action="/like" method="POST">
+                                                        <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
+                                                        <input name="session" id="session_name" type="hidden" value="<%= session %>"/>
+                                                        <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+                                                    <% if (liked){ %>
+                                                        <button id="like_button" type="submit" class="btn btn-warning">Dislike</button>
+                                                    <% } else { %>
+                                                        <button id="like_button" type="submit" class="btn btn-success">Like</button>
+                                                    <% } %>
+                                                    </form>
+                                                    <form action="/block" method="POST">
+                                                        <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
+                                                        <input name="session" id="session_name" type="hidden" value="<%= session %>"/>
+                                                        <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+                                                        <button id="block_button" type="submit" class="btn btn-danger">Block</button>
+                                                    </form>
                                                 </div>
-                                                <% images.forEach(function(image){ %>
-                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
-                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
-                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
-                                                    <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
-                                                    <% }) %>
-                                                    <% }) %>
+                                                <% } %>
+                                                <div id="panel-warning" style="margin-left: 43.5%; color: yellow">
+                                                    <% if (rating) {
+                                                        for (var i = 0; i < rating; i++){ %>
+                                                            <i id="profile_hearts<%= i + 1 %>" class="fas fa-star"></i>
+                                                            <% } 
+                                                            while (i < 5){ %>
+                                                                <i id="profile_hearts<%= i + 1 %>" class="far fa-star"></i>
+                                                                <% i++;
+                                                            } 
+                                                        } else { %>
+                                                            <i onclick="rating(event)" id="profile_heart1" class="far fa-star" stule="width: 12px;"></i>
+                                                            <i onclick="rating(event)" id="profile_heart2" class="far fa-star" stule="width: 12px;"></i>
+                                                            <i onclick="rating(event)" id="profile_heart3" class="far fa-star" stule="width: 12px;"></i>
+                                                            <i onclick="rating(event)" id="profile_heart4" class="far fa-star" stule="width: 12px;"></i>
+                                                            <i onclick="rating(event)" id="profile_heart5" class="far fa-star" stule="width: 12px;"></i>
+                                                            <% } %>
+                                                        </div>
+                                                        
+                                                    </div> 
+                                                    <% images.forEach(function(image){ %>
+                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
+                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
+                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
+                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
+                                                        <% }) %>
+                                                <% }) %>
                                                 </div>
-                                                
-                                                <input id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
-                                                <input id="session_name" type="hidden" value="<%= session %>"/>
                                                 <script src="/js/profiles.js">
                                                 </script>
                                                 <% include partials/footer %>

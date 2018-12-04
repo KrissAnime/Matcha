@@ -1,6 +1,6 @@
 <% include partials/head %>
 <header>
-        <%- include('partials/header', {session: session}); %>
+    <%- include('partials/header', {session: session}); %>
 </header>
 
 <div id='myModal' class='modal'>
@@ -8,20 +8,20 @@
 	<div id='image_box'>
 		<span class='close' style='color: white'>&times;</span>
 			<div id='modal_image'>
-			</div>
+            </div>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input name="user_image" type="file">
+                <input type="hidden" name="unique_key" value="<%= user_key %>">
+                <input type="hidden" id="photo" name="photo" value="">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
 			<br/>
-    </div>
-        <%= typeof msg != 'undefinded ? msg : '' %>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input name="user_image" type="file">
-        <input type="hidden" name="unique_key" value="<%= result[0].unique_key %>">
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+	</div>
 </div>
 
 <div class="user_profiles">
     <% users.forEach(function(user){ %>
-        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= user.profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
+        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].profile %>')">
             <div class="" ></div>
         </div>
         <div id="user_bio_details">
@@ -49,19 +49,26 @@
                             <td><%= user.age %></td>
                         </tr>
                         <tr>
-                            <td><%= user.gender %> </td>
+                            <td>Gender: </td>
+                            <% if (user.gender == 1){ %>
+                                <td>Female</td>
+                            <% }else{ %>
+                                <td>Male</td>
+                            <% } %>
                         </tr>
                             <tr>
                                 <td><%= user.sexual_pref %></td>
                             <td></td>
-                        </tr>
-                    </table>       
-                    <a href="../../editing/<%= user.unique_key %>" ><button type="button" class="btn btn-secondary">Edit Details</button> </a>                     
+                        </tr> 
+                    </table>
+                    <a href="../../editing/<%= user_key %>" ><button type="button" class="btn btn-secondary">Edit Details</button> </a> 
             </div>
                                         <div id="user_other_details">
                                             <div id="container" style="padding: 10px; color: white">
                                                 <p id="user_other_about_me_text"><%= user.bio %></p>
                                             </div>
+                                            
+                                                    
                                                 </div>
                                                 <% images.forEach(function(image){ %>
                                                     <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
@@ -71,8 +78,6 @@
                                                     <% }) %>
                                                     <% }) %>
                                                 </div>
-                                                <script src="/js/profiles.js">
+                                                <script src="/js/profile.js">
                                                 </script>
-
-
-<% include partials/footer %>
+                                                <% include partials/footer %>

@@ -66,7 +66,7 @@ var like_button = document.getElementById('like_button');
 var block_button = document.getElementById('block_button');
 var hidden_key = document.getElementById('hidden_key').value;
 var session_name = document.getElementById('session_name').value;
-
+var my_key = document.getElementById('my_key').value;
 
 function blowup(event, img){
     var img = img.replace(/ /g, "\\ ");
@@ -82,13 +82,7 @@ span.onclick = function() {
     modal.style.display = "none";
 }
 
-var love_level_1 = document.getElementById('profile_hearts1');
-love_level_2 = document.getElementById('profile_hearts2'),
-love_level_3 = document.getElementById('profile_hearts3'),
-love_level_4 = document.getElementById('profile_hearts4'),
-love_level_5 = document.getElementById('profile_hearts5');
-
-love_level_1.onclick = function(){
+function rating(event){
     xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST","/like_me",true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -96,67 +90,35 @@ love_level_1.onclick = function(){
         if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
         }
     }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=1");
+    var val = event.target.id.slice(-1);
+    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level="+val);
 }
 
-love_level_2.onclick = function(){
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST","/like_me",true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
-        }
-    }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=2");
-}
-
-love_level_3.onclick = function(){
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST","/like_me",true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
-        }
-    }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=3");
-}
-
-love_level_4.onclick = function(){
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST","/like_me",true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
-        }
-    }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=4");
-}
-
-love_level_5.onclick = function(){
-    
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST","/like_me",true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){ 
-        }
-    }
-    xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key+"&love_level=5");
-}
-
-like_button.onclick = function() {
+function like_me(){
     xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST","/like",true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){  
-            console.log("Liked");
+        if (xmlhttp.readyState== 4 && xmlhttp.status== 200){
+            // if (like_button.classList.contains('btn', 'btn-warning')){
+            //     like_button.classList.remove('btn', 'btn-warning');
+            //     like_button.classList.add('btn', 'btn-success');
+            //     location.reload();
+            // }
+            // else{
+            //     like_button.classList.remove('btn', 'btn-success');
+            //     like_button.classList.add('btn', 'btn-warning');
+            //     location.reload();
+            // }
+            // header('Location: /profiles/'+my_key)
+            // // Location('./profiles/'+my_key);
+            // location.reload(true);
         }
     }
     xmlhttp.send("session="+session_name+"&hidden_key="+hidden_key);
 }
 
-block_button.onclick = function() {
+function block_me(){
     if (confirm("Are you sure you want to block this user? This action cannot be undone!")){
         xmlhttp = new XMLHttpRequest();
         xmlhttp.open("POST","/block",true);

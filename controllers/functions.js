@@ -348,11 +348,15 @@ module.exports.search_and_recover = function (data, callback){
 }
 
 module.exports.registration_input = function (register, callback){
+    var pass_strength = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
     if (!register.firstname || !register.lastname || !register.email || !register.username || !register.password || !register.mpassword){
         callback("missing", null);
     }
     if (register.password !== register.mpassword){
         callback("mismatch", null);
+    }
+    if (!pass_strength.test(register.password)){
+        callback("weak password", null);
     }
     sql = "SELECT `email`, `user_name` FROM `matcha`.`users`";
     con.query(sql, function(err, result){
@@ -492,25 +496,58 @@ module.exports.check_my_registration = function (reg_me, callback){
             reg_me.long = geo.ll[1];
             reg_me.lat = geo.ll[1];
         });
+        var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
+        var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
+        con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                console.log('User profile table updated succesfully');
+                sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
+                con.query(sql2, [reg_me.key], function(err2, res2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        sql3 = "INSERT INTO `matcha`.`images` (`unique_key`) VALUES (?)";
+                        con.query(sql3, [reg_me.key], function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            }else {
+                                console.log('User verification succesful');
+                                callback(null, "success");
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
+        var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
+        con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                console.log('User profile table updated succesfully');
+                sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
+                con.query(sql2, [reg_me.key], function(err2, res2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        sql3 = "INSERT INTO `matcha`.`images` (`unique_key`) VALUES (?)";
+                        con.query(sql3, [reg_me.key], function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            }else {
+                                console.log('User verification succesful');
+                                callback(null, "success");
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
-    var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
-    var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
-    con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
-        if (err){
-            console.log(err);
-        } else {
-            console.log('User profile table updated succesfully');
-            sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
-            con.query(sql2, [reg_me.key], function(err2, res2){
-                if (err2){
-                    console.log(err2);
-                } else {
-                    console.log('User verification succesful');
-                    callback(null, "success");
-                }
-            })
-        }
-    });
 }
 
 module.exports.forget_me = function(email, callback){
@@ -523,7 +560,7 @@ module.exports.forget_me = function(email, callback){
                 console.log(err);
             } else {
                 if (result[0]){
-                    var number = (Math.floor(Math.random() * 1000) + 1) * (Math.floor(Math.random() * 100) + 1);
+                    var number = (Math.floor(Math.random() * 2831) + 1) * (Math.floor(Math.random() * 79425) + 1);
                     var code = encryption(number.toString()).substr(8, 36);
                     sql = "INSERT INTO `matcha`.`verification` (`email`, `code`) VALUES (?, ?)";
                     con.query(sql, [email, code], function(err2, result2){
@@ -553,50 +590,49 @@ module.exports.forget_me = function(email, callback){
     }
 }
 
-module.exports.check_reset = function(data, callback){
-    if (!data.code){
-        callback("Invalid", null);
-    } else {
-        sql = "SELECT `email`, `code` FROM `matcha`.`verification` WHERE `code` = ?";
-        con.query(sql, [data.code], function(err, result){
-            if (err){
-                console.log(err);
-            } else {
-                if (result[0]){
-                    "DELETE FROM `matcha`.`verification` WHERE `code` = ?";
-                    con.query(sql, [data.code], function(err2, result2){
-                        if (err2){
-                            console.log(err2);
-                        } else {
-                            callback(null, "Success");
-                        }
-                    });
-                } else {
-                    callback("Invalid", null);
-                }
-            }
-        });
-    }
-}
-
 module.exports.update_password = function(data, callback){
     if (!data.password || !data.mpassword || !data.email){
         callback("Invalid", null);
     } else {
-        data.password == encryption(data.password);
-        data.mpassword == encryption(data.mpassword);
+        var pass_strength = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+        if (!pass_strength.test(data.password)){
+            callback("weak password", null);
+        }
+        data.password = encryption(data.password);
+        data.mpassword = encryption(data.mpassword);
         if (data.password != data.mpassword){
             callback("Invalid", null);
         } else {
-            sql = "UPDATE `matcha`.`users` SET `password` = ?";
-            con.query(sql, [data.password], function(err, result){
-                if (err){
-                    console.log(err);
+            console.log(data);
+            var sql3 = "SELECT * FROM `matcha`.`verification` WHERE `email` = ?";
+            con.query(sql3, [data.email], function(err3, result3){
+                if (err3){
+                    console.log(err3);
                 } else {
-                    console.log("User Details Updated");
-                    callback(null, "Success");
+                    
+                    if (result3[0]){
+                        var sql2 = "DELETE FROM `matcha`.`verification` WHERE `email` = ?";
+                        con.query(sql2, [data.email], function(err2, result2){
+                            if (err2){
+                                console.log(err2);
+                            } else {
+                                console.log("Verification Entry Deleted");
+                                var sql = "UPDATE `matcha`.`users` SET `password` = ? WHERE `email` = ?";
+                                con.query(sql, [data.password, data.email], function(err, result){
+                                    if (err){
+                                        console.log(err);
+                                    } else {
+                                        console.log("User Details Updated");
+                                        callback(null, "Success");
+                                    }
+                                });
+                            }
+                        });
+                    } else{
+                        callback("Invalid", null);
+                    }
                 }
-            })
+            });
         }
     }
 }

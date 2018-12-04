@@ -14,7 +14,6 @@ const session = require('express-session');
 const mysql = require('mysql');
 const functions = require('./controllers/functions.js');
 const socket = require('socket.io');
-const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const mkdirp = require('mkdirp');
 
@@ -57,6 +56,42 @@ var server = app.listen(3000, function () {
     console.log('Server started on port 3000...');
 });
 
+// Init Upload
+var upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, callback) => {
+            let path = './public/extra/profiles/' + req.session.username;
+            callback(null, path);
+        },
+        filename: (req, file, callback) => {
+            //originalname is the uploaded file's name with extn
+            callback(null, "uploads" + '-' + Date.now() + path.extname(file.originalname));
+        }
+    }),
+    limits: {fileSize: 5242880},
+    fileFilter: function(req, file, callback){
+        checkFileType(file, callback);
+    }
+}).single('user_image')
+
+
+
+
+//Check File Type
+function checkFileType(file, callback){
+    //Allowed ext
+    const filetypes = /jpeg|jpg|png/;
+    //Check ext
+    const extname  = filetypes.test(path.extname(file.originalname).toLowerCase());
+    //Check mime
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype && extname){
+        return callback(null, true);
+    } else {
+        callback('Error: Images Only!');
+    }
+}
+
 //Secket Setup
 var io = socket(server);
 
@@ -65,7 +100,6 @@ io.on('connection', function (socket) {
     
     socket.on('chat', function (data) {
         // io.sockets.emit('chat', data);
-        
         sql = "INSERT INTO `matcha`.`messaging` (`sender`, `receiver`, `message`)";
         sql += " VALUES (?, ?, ?)";
         con.query(sql, [data.chat_mate, data.my_key, data.message], function (err, result) {
@@ -134,56 +168,81 @@ app.get('/profiles/:unique_key', function (req, res, next) {
             }
             else {
                 if (result[0]){
-                    if (result[0].bio = escapeHtmlReverse(result[0].bio)){
-                        sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = ?";
-                        con.query(sql, [req.params.unique_key], function (err, result2) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                sql4 = "SELECT `unique_key`, `email` FROM `matcha`.`users` WHERE `user_name` = ?";
-                                con.query(sql4, [req.session.username], function(err, result4){
-                                    if (err){
-                                        console.log(err);
-                                    } else {
-                                        var my_key = result4[0].unique_key;
-                                        sql = "SELECT `rating` FROM `matcha`.`rating` WHERE `rated` = ? AND `rator` = ?";
-                                        con.query(sql, [req.params.unique_key, my_key], function (err2, result3) {
-                                            if (err2) {
-                                                console.log(err2);
-                                            } else {
-                                                // console.log(result3);
-                                                if (result3[0]){
-                                                    var rate = result3[0].rating;
-                                                } else {
-                                                    var rate = 0;
-                                                }
-                                                var data = {
-                                                    email: result4[0].email,
-                                                    text: result[0].user_name + " visited your profile.\nYou can visit their profile here http://localhost:3000/profiles/" + my_key,
-                                                    subject: "Matcha Visitation"
-                                                }
-                                                functions.mailman(data, function(call_err, resp){
-                                                    if (call_err){
-                                                        console.log(call_err);
-                                                    } else {
-                                                        res.render('profiles',
-                                                        {
-                                                            users: result,
-                                                            images: result2,
-                                                            session: req.session.username,
-                                                            rating: rate, 
-                                                            hidden_key: req.params.unique_key
-                                                        });
-                                                    }
-                                                })
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
+                    if (result[0].bio){
+                        result[0].bio = escapeHtmlReverse(result[0].bio);
                     }
+                    sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = ?";
+                    con.query(sql, [req.params.unique_key], function (err, result2) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            sql4 = "SELECT `unique_key`, `email`, `profile` FROM `matcha`.`users` WHERE `user_name` = ?";
+                            con.query(sql4, [req.session.username], function(err, result4){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                    var my_key = result4[0].unique_key;
+                                    var control = result4[0].profile;
+                                    sql = "SELECT `rating` FROM `matcha`.`rating` WHERE `rated` = ? AND `rator` = ?";
+                                    con.query(sql, [req.params.unique_key, my_key], function (err2, result3) {
+                                        if (err2) {
+                                            console.log(err2);
+                                        } else {
+                                            // console.log(result3);
+                                            if (result3[0]){
+                                                var rate = result3[0].rating;
+                                            } else {
+                                                var rate = 0;
+                                            }
+                                            var data = {
+                                                email: result4[0].email,
+                                                text: req.session.username + " visited your profile.\nYou can visit their profile here http://localhost:3000/profiles/" + my_key,
+                                                subject: "Matcha Visitation"
+                                            }
+                                            functions.mailman(data, function(call_err, resp){
+                                                if (call_err){
+                                                    console.log(call_err);
+                                                } else {
+                                                    sql = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE (`receiver` = ? AND `instigator` = ?) OR (`receiver` = ? AND `instigator` = ?)";
+                                                    con.query(sql, [my_key, req.params.unique_key, req.params.unique_key, my_key], function(err5, result5){
+                                                        if (err5){
+                                                            console.log(err5);
+                                                        } else {
+                                                            var likeable = "";
+                                                            var liked = "";
+                                                            if (result5[0]){
+                                                                if (result5[0].instigator == my_key){
+                                                                    liked = "done";
+                                                                }
+                                                                if (result5[1]){
+                                                                    liked = "done";
+                                                                    likeable = "Yep";
+                                                                }
+                                                            }
+                                                            res.render('profiles',
+                                                            {
+                                                                liked: liked,
+                                                                control: control,
+                                                                likeable: likeable,
+                                                                users: result,
+                                                                images: result2,
+                                                                session: req.session.username,
+                                                                rating: rate, 
+                                                                hidden_key: req.params.unique_key,
+                                                                my_key: my_key
+                                                            });
+                                                        }
+                                                    });
+                                                    
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 } else {
                     next();
                 }
@@ -203,7 +262,9 @@ app.get('/profile', function (req, res) {
                 console.log(err);
             }
             else {
-                result[0].bio = escapeHtmlReverse(result[0].bio);
+                if (result[0].bio){
+                    result[0].bio = escapeHtmlReverse(result[0].bio);
+                }
                 var user_key = result[0].unique_key;
                 sql = "SELECT * FROM `matcha`.`images` WHERE `unique_key` = ?";
                 con.query(sql, [user_key], function (err, result2) {
@@ -214,7 +275,8 @@ app.get('/profile', function (req, res) {
                         res.render('profile', {
                             images: result2,
                             users: result,
-                            session: req.session.username
+                            session: req.session.username,
+                            user_key: user_key
                         });
                     }
                 })
@@ -322,11 +384,10 @@ app.get('/messaging/:unique_key', function (req, res, next) {
                 }
                 sql = "SELECT * FROM `matcha`.`messaging` WHERE `receiver` = ? AND `sender` = ?";
                 sql += " OR `receiver` = ? AND `sender` = ? ORDER BY `time_log` ASC";
-                con.query(sql, [my_key, req.params.unique_key, req.params.unique_key0, my_key], function (err2, result2) {
+                con.query(sql, [my_key, req.params.unique_key, req.params.unique_key, my_key], function (err2, result2) {
                     if (err2) {
                         console.log(err2);
                     } else {
-                        // console.log(result2);
                         res.render('messaging',
                         {
                             session: req.session.username,
@@ -338,16 +399,6 @@ app.get('/messaging/:unique_key', function (req, res, next) {
                             chat_profile: chat_profile
                         });
                     }
-                    res.render('messaging',
-                    {
-                        session: req.session.username,
-                        chat_mate: chat_mate,
-                        chat_key: chat_key,
-                        messages: result2,
-                        my_key: my_key,
-                        my_profile: my_profile,
-                        chat_profile: chat_profile
-                    });
                 }); 
             }
         })
@@ -357,9 +408,22 @@ app.get('/messaging/:unique_key', function (req, res, next) {
 })
 
 //Editing page
-app.get('/editing:unique_key', function(req, res, next){
+app.get('/editing/:unique_key', function(req, res, next){
     if (req.session.username){
-        res.render('./editing')
+        sql2 = "SELECT `tag_name` FROM `matcha`.`tags`";
+        con.query(sql2, function(err, result2){
+            if (err){
+                console.log(err);
+            } else {
+                empty = "";
+                res.render('editing',
+                {
+                    session: empty,
+                    error: empty,
+                    tags: result2,
+                });
+            }
+        });
     } else {
         res.redirect('/')
     }
@@ -402,32 +466,26 @@ app.post('/forgotten', function (req, res){
     });
 });
 
-app.get('/reset_2/:code', function(req, res, next){
+//Resetting Password
+app.get('/reset_2/:code', function(req, res){
     data = {
         code: req.params.code
     }
-    functions.check_reset(data, function(err, resp){
-        if (err){
-            next();
-        } else {
-            res.render('./reset_2',
-            {
-                session: "",
-                error: "",
-            });
-        }
+    res.render('./reset_2',
+    {
+        session: "",
+        error: "",
     });
+    
 });
 
-app.post('/reset_2', function(req, res){
+app.post('/reset_2/:code', function(req, res){
     data = {
         email: req.body.email,
         password: req.body.password,
         mpassword: req.body.mpassword,
     }
     functions.update_password(data, function(err, resp){
-        console.log(err);
-        console.log(resp);
         if (err){
             res.render('./reset_2',
             {
@@ -439,38 +497,6 @@ app.post('/reset_2', function(req, res){
         }
     });
 })
-
-//Resetting Password
-app.get('/reset', function (req, res){
-    res.render('./reset',
-    {
-        error: "",
-        session: "",
-    });
-});
-
-app.post('/reset', function (req, res){
-    data = {
-        email: req.body.email,
-        code: req.body.code,
-    }
-    functions.check_reset(data, function(err, resp){
-        if (err){
-            res.render('./reset',
-            {
-                error: err,
-                session: "",
-            });
-        } else {
-            req.session.key = "Valid";
-            res.render('./reset',
-            {
-                error: err,
-                session: "",
-            });
-        }
-    }); 
-});
 
 //Login Page
 app.get('/login', function (req, res) {
@@ -490,10 +516,6 @@ app.post('/login', function (req, res) {
         if (resp == '0') {
             res.render('./login', { result: error, session: empty });
         } else {
-            var user = {
-                
-            }
-            jwt.sign({});
             if (resp == '2'){
                 req.session.hidden = functions.encryption(req.body.username);
                 req.session.hidden_two = req.body.username;
@@ -522,6 +544,13 @@ app.get('/register_completion', function(req, res){
                         if (err){
                             console.log(err);
                         } else {
+                            mkdirp('./public/extra/profiles/' + req.session.hidden_two, function(err){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                    console.log('Folder Created For New User');
+                                }
+                            });
                             res.render('register_completion',
                             {
                                 session: empty,
@@ -531,7 +560,7 @@ app.get('/register_completion', function(req, res){
                                 hide_me: req.session.hidden
                             });
                         }
-                    })
+                    });
                 }
             }
         });
@@ -578,13 +607,6 @@ app.post('/register_completion', function(req, res){
                                         hide_me: req.session.hidden
                                     });
                                 } else {
-                                    mkdirp('./public/extra/profiles/' + req.session.hidden_two, function(err){
-                                        if (err){
-                                            console.log(err);
-                                        } else {
-                                            console.log('Folder Created For New User');
-                                        }
-                                    })
                                     req.session.hidden = "";
                                     req.session.username = req.session.hidden_two;
                                     req.session.hidden_two = "";
@@ -742,15 +764,16 @@ app.post('/like', function (req, res) {
                     if (result2[0]){
                         sql3 = "DELETE FROM `matcha`.`likes` WHERE `instigator` = ? AND `receiver` = ?";
                         var message = "It looks like " + req.body.session + " no longer likes you! :'(";
+                        console.log('User Disliked Someone');
                     } else {
                         sql3 = "INSERT INTO `matcha`.`likes` (`instigator`, `receiver`) VALUES (?, ?)";
                         var message = "It looks like " + req.body.session + " likes you! :) Maybe you should like them back?\nLogin now and check out their profile page!\n\nhttp://localhost:3000/profiles/" + my_key;
+                        console.log('User Liked Someone');
                     }
                     con.query(sql3, [my_key, req.body.hidden_key], function(err3, result3){
                         if (err3){
                             console.log(err3);
                         } else {
-                            // console.log(result3);
                             sql4 = "SELECT `matcha`.`users`.`email`, `matcha`.`users`.`user_name` FROM `matcha`.`users` INNER JOIN `matcha`.`profiles` ON `matcha`.`users`.`user_name` = `matcha`.`profiles`.`user_name` WHERE `matcha`.`profiles`.`unique_key` = '" + req.body.hidden_key + "'";
                             con.query(sql4, function(err4, result4){
                                 if (err4){
@@ -765,8 +788,7 @@ app.post('/like', function (req, res) {
                                         if (err_mail){
                                             console.log(err_mail);
                                         } else {
-                                            console.log(resp_mail);
-                                            alert('You Liked ' + result4[0].user_name);
+                                            res.redirect("./profiles/" + req.body.hidden_key);
                                         }
                                     })
                                 }
@@ -800,7 +822,6 @@ app.post('/block', function (req, res) {
                         if (err4){
                             console.log(err4);
                         } else {
-                            
                             var data = {
                                 email: result4[0].email,
                                 subject: subject,
@@ -810,7 +831,7 @@ app.post('/block', function (req, res) {
                                 if (err_mail){
                                     console.log(err_mail);
                                 } else {
-                                    console.log(resp_mail);
+                                    res.redirect('./')
                                 }
                             });
                         }
@@ -841,14 +862,12 @@ app.post('/like_me', function (req, res) {
                         } else {
                             var love_me = req.body.love_level;
                         }
-                        // console.log(my_key);
-                        // console.log(req.body.hidden_key);
                         sql3 = "UPDATE `matcha`.`rating` SET `rating` = ? WHERE `rator` = ? AND `rated` = ?";
                         con.query(sql3, [love_me, my_key, req.body.hidden_key], function(err3, result3){
                             if (err3){
                                 console.log(err3);
                             } else {
-                                console.log(req.body.session + " changed their rating of someone..?");
+                                res.redirect("./profiles/" + req.body.hidden_key);
                             }
                         });
                     } else {
@@ -857,7 +876,7 @@ app.post('/like_me', function (req, res) {
                             if (err3){
                                 console.log(err3);
                             } else {
-                                console.log(req.body.session + " changed their rating of someone..?");
+                                res.redirect("./profiles/" + req.body.hidden_key);
                             }
                         });
                     }
@@ -871,49 +890,47 @@ app.post('/upload', function(req, res){
     if (req.session.username){
         upload(req, res, (err) => {
             if (err){
-                alert(err);
+                console.log(err);
             } else {
-                const storage = multer.diskStorage({
-                    destination: './public/extra/profiles/' + req.session.username,
-                    filename: function(req, file, callback){
-                        callback(null, req.session.username + '-' + Date.now() + path.extname(file.originalname));
+                console.log(req.body.photo);
+                if (req.body.photo != 'e'){
+                    var sql = "UPDATE `matcha`.`images` SET `img_0" + req.body.photo + "` = ? WHERE `unique_key` = ?";
+                    con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                        if (err){
+                            console.log(err);
+                        } else {
+                            console.log("Image Update Successful");
+                        }
+                    });
+                } else {
+                    var sql = "UPDATE `matcha`.`images` SET `profile` = ? WHERE `unique_key` = ?";
+                    con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                        if (err){
+                            console.log(err);
+                        } else {
+                            console.log("Image Update Successful");
+                        }
+                    });
+                }
+                var sql = "UPDATE `matcha`.`users` SET `profile` = ? WHERE `unique_key` = ?";
+                con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                    if (err){
+                        console.log(err);
+                    } else {
+                        console.log("Image Update Successful");
+                        res.redirect('./profile');
                     }
                 });
-                
-                // Init Upload
-                const upload = multer({
-                    storage: storage,
-                    limits: {fileSize: 5242880},
-                    fileFilter: function(req, file, callback){
-                        checkFileType(file, callback);
-                    }
-                }).single('new_image')
-                console.log(req.file);
             }
-        })
+        });
     } else {
         res.redirect('/')
     }
 });
 
+
+
 //For when users attempt an invalid or broken url
 app.use(function (req, res) {
     res.render('error');
 });
-
-
-
-//Check File Type
-function checkFileType(file, callback){
-    //Allowed ext
-    const filetypes = /jpeg|jpg|png/;
-    //Check ext
-    const extname  = filetypes.test(path.extname(file.originalname).toLowerCase());
-    //Check mime
-    const mimetype = filetypes.test(file.mimetype);
-    if (mimetype && extname){
-        return callback(null, true);
-    } else {
-        callback('Error: Images Only!');
-    }
-}
