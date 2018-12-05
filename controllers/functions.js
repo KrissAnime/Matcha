@@ -22,6 +22,15 @@ function mailman(data, callback){
     });
 }
 
+function verify_email(email){
+    var pattern = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i;
+    return (pattern.test(email));
+}
+
+function verify_password(password){
+    var pass_strength = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+    return (pass_strength.test(password));
+}
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -30,20 +39,13 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-function twin(user_tag){
-    var max = user_tag.length;
-    var start = 0;
-    var next = 1;
-    
-    user_tag.sort();
-    while (next <= max){
-        if (user_tag[start] == user_tag[next]){
-            user_tag[next] = "NULL";
-        }
-        start++;
-        next++;
-    }
-    return user_tag;
+function escapeHtml(unsafe) {
+    return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function escapeHtmlReverse(unsafe) {
@@ -348,15 +350,17 @@ module.exports.search_and_recover = function (data, callback){
 }
 
 module.exports.registration_input = function (register, callback){
-    var pass_strength = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
     if (!register.firstname || !register.lastname || !register.email || !register.username || !register.password || !register.mpassword){
         callback("missing", null);
     }
     if (register.password !== register.mpassword){
         callback("mismatch", null);
     }
-    if (!pass_strength.test(register.password)){
-        callback("weak password", null);
+    if (!verify_password(register.password)){
+        callback("Weak Password", null);
+    }
+    if (!verify_email(register.email)){
+        callback("Invalid Email", null);
     }
     sql = "SELECT `email`, `user_name` FROM `matcha`.`users`";
     con.query(sql, function(err, result){
@@ -446,7 +450,6 @@ module.exports.double_message = function(data, callback){
         }
         start++;
         next = start + 1;
-        // console.log(data[next].sender);
     });
     callback(null, data);
 }
@@ -463,18 +466,10 @@ module.exports.mailman = function(data, callback){
         if (error) {
             console.log(error);
         } else {
-            console.log('Email sent: ' + info.response);
+            console.log('Email sent to ' + data.email);
             callback(null, "sent");
         }
     });
-}
-
-module.exports.gimme_gimme = function (request, callback){
-    if (request){
-        con.qu
-    } else {
-        callback("no_request", null);
-    }
 }
 
 module.exports.check_my_registration = function (reg_me, callback){
@@ -496,7 +491,7 @@ module.exports.check_my_registration = function (reg_me, callback){
             reg_me.long = geo.ll[1];
             reg_me.lat = geo.ll[1];
         });
-        var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
+        var tag_list = reg_me.tag_1 + ", " + reg_me.tag_2 + ", " + reg_me.tag_3;
         var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
         con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
             if (err){
@@ -594,8 +589,7 @@ module.exports.update_password = function(data, callback){
     if (!data.password || !data.mpassword || !data.email){
         callback("Invalid", null);
     } else {
-        var pass_strength = /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
-        if (!pass_strength.test(data.password)){
+        if (!verify_password(data.password)){
             callback("weak password", null);
         }
         data.password = encryption(data.password);
@@ -636,3 +630,105 @@ module.exports.update_password = function(data, callback){
         }
     }
 }
+
+module.exports.update_profile = function(prof_data, callback){
+    if (!prof_data.firstname && !prof_data.lastname && !prof_data.email && !prof_data.password && !prof_data.mpassword && !prof_data.bio
+        && !prof_data.age && !prof_data.gender && !prof_data.sexual_pref && !prof_data.tag_1 && !prof_data.tag_2 && !prof_data.tag_3){
+            callback("Unchanged", null);
+        } else if (prof_data.password && !verify_password(prof_data.password)){
+            callback("Password Is Not Strong Enough", null);
+        } else if (prof_data.password && prof_data.mpassword && prof_data.password !== prof_data.mpassword){
+            callback("Passwords Do Not Match", null);
+        } else if (prof_data.email && !verify_email(prof_data.email)){
+            callback("Please Enter Correct Email Address", null);
+        }
+        sql = "SELECT * FROM `matcha`.`profiles` INNER JOIN `matcha`.`users` ON `profiles`.`user_name`=`users`.`user_name` WHERE `users`.`user_name` = ?"
+        con.query(sql, [prof_data.session], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (!prof_data.firstname){
+                    prof_data.firstname = result[0].first_name;
+                }
+                if (!prof_data.lastname){
+                    prof_data.lastname = result[0].last_name;
+                }
+                if (!prof_data.age){
+                    prof_data.age = result[0].age;
+                }
+                if (!prof_data.sexual_pref){
+                    prof_data.sexual_pref = result[0].sexual_pref;
+                }
+                if (!prof_data.bio){
+                    prof_data.bio = result[0].bio;
+                } else {
+                    prof_data.bio = escapeHtml(prof_data.bio);
+                }
+                if (!prof_data.email){
+                    prof_data.email = result[0].email;
+                }
+                if (!prof_data.password){
+                    prof_data.password = result[0].first_name;
+                } else {
+                    prof_data.password = encryption(prof_data.password);   
+                }
+                if (!prof_data.gender){
+                    prof_data.gender = result[0].gender;
+                }
+                if (!prof_data.long || !prof_data.lat){
+                    prof_data.long = result[0].location_long;
+                    prof_data.lat = result[0].location_lat;
+                }
+                sql2 = "SELECT * FROM `matcha`.`user_tags` WHERE `unique_key` = ?";
+                con.query(sql2, [result[0].unique_key], function(err2, result2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        if (!prof_data.tag_1){
+                            prof_data.tag_1 = result2[0].tag_name;
+                        }
+                        if (!prof_data.tag_2){
+                            prof_data.tag_2 = result2[1].tag_name;
+                        }
+                        if (!prof_data.tag_3){
+                            prof_data.tag_3 = result2[2].tag_name;                        
+                        }
+                        var interests = prof_data.tag_1 + ", " + prof_data.tag_2 + ", " +prof_data.tag_3;
+                        sql3 = "UPDATE `matcha`.`profiles` SET `first_name` = ?, `last_name` = ?, `age` = ?, `gender` = ?, `sexual_pref` = ?, `location_lat` = ?, `location_long` = ?, `bio` = ?, `interests` = ? WHERE `unique_key` = ?";
+                        con.query(sql3, [prof_data.firstname, prof_data.lastname, prof_data.age, prof_data.gender, prof_data.sexual_pref, prof_data.lat, prof_data.long, prof_data.bio, interests, result[0].unique_key], function (err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            } else {
+                                console.log(result3);
+                                sql4 = "UPDATE `matcha`.`user_tags` SET `tag_name` = ? WHERE `tag_name` = ? AND `unique_key` = ?";
+                                con.query(sql4, [prof_data.tag_1, result2[0].tag_name, result[0].unique_key], function(err4, result4){
+                                    if (err4){
+                                        console.log(err4);
+                                    } else {
+                                        console.log(result4);
+                                        var sql5 = "UPDATE `matcha`.`user_tags` SET `tag_name` = ? WHERE `tag_name` = ? AND `unique_key` = ?";
+                                        con.query(sql5, [prof_data.tag_2, result2[1].tag_name, result[0].unique_key], function(err5, result5){
+                                            if (err5){
+                                                console.log(err5);
+                                            } else {
+                                                console.log(result5);
+                                                var sql6 = "UPDATE `matcha`.`user_tags` SET `tag_name` = ? WHERE `tag_name` = ? AND `unique_key` = ?";
+                                                con.query(sql6, [prof_data.tag_3, result2[2].tag_name, result[0].unique_key], function(err6, result6){
+                                                    if (err6){
+                                                        console.log(err6);
+                                                    } else {
+                                                        console.log(result6);
+                                                        callback("Update Successfull");
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+            }
+        });
+    }

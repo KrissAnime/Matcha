@@ -3,71 +3,64 @@
         <%- include('partials/header', {session: session}) %>
 </header>
 
-<div class="container" id="registration_box">
+<div class="container" id="registration_box" style="width: 30%; float: left;">
     <form action="" method="POST" id="registration_form" name="registration_form">
-        <label>First Name:</label> <input type="text" maxlength="30" size="30" id="firstname" name="firstname" placeholder="First Name..."><br/>
-        <label>Last Name:</label> <input type="text" maxlength="30" size="30" id="lastname" name="lastname" placeholder="Last Name..."><br/>
-        <label>Email:</label> <input type="text" size="30" maxlength="50" id="email" name="email" placeholder="Email..."><br/>
-        <label>Username:</label> <input type="text" size="30" maxlength="30" id="username" name="username" placeholder="Username..."><br/>
-        <label>Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="password" name="password" placeholder="Password..."><br/>
-        <label>Confirm Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="mpassword" name="mpassword" placeholder="Confirm Password..."><br/>
+        <label>First Name:</label> <input type="text" maxlength="30" size="30" id="firstname" name="firstname" placeholder="First Name..." style="float: right"><br/>
+        <label>Last Name:</label> <input type="text" maxlength="30" size="30" id="lastname" name="lastname" placeholder="Last Name..." style="float: right"><br/>
+        <label>Email:</label> <input type="text" size="30" maxlength="50" id="email" name="email" placeholder="Email..." style="float: right"><br/>
+        <label>Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="password" name="password" placeholder="Password..." style="float: right"><br/>
+        <label>Confirm Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="mpassword" name="mpassword" placeholder="Confirm Password..." style="float: right"><br/>
         <label>Age </label>
-                <input  type="number" id="user_age" name="user_age" placeholder="Age" min="18" max="60"><br>
-                <label>Gender </label>            
+        <input  type="number" id="user_age" name="user_age" placeholder="Age" min="18" max="60"><br>
+            <label>Gender </label>            
                 <select id="gender" name="gender" style="float: right">
                     <option></option>
                     <option>Male</option>
                     <option>Female</option>
                 </select><br>
-                <label>Sexual Orientation </label>            
+            <label>Sexual Orientation </label>            
                 <select id="sexual_pref" name="sexual_pref" style="float: right">
                     <option></option>
                     <option>Men</option>
                     <option>Women</option>
                     <option>Both</option>
                 </select><br>
-                <label>Tag 1 </label>
+            <label>Tag 1 </label>
                 <select id="tag1_select" name="tag1_select" style="float: right">
-                <option></option>
-                    <% tags.forEach(function(tag){ %>
-                        <option><%= tag.tag_name %></option>
-                    <% }) %>
+                    <option></option>
+                        <% tags.forEach(function(tag){ %>
+                            <option><%= tag.tag_name %></option>
+                        <% }) %>
                 </select><br>
-                <label>Tag 2 </label>
+            <label>Tag 2 </label>
                 <select id="tag2_select" name="tag2_select" style="float: right">
-                <option></option>
-                    <% tags.forEach(function(tag){ %>
-                        <option><%= tag.tag_name %></option>
-                    <% }) %>
+                    <option></option>
+                        <% tags.forEach(function(tag){ %>
+                            <option><%= tag.tag_name %></option>
+                        <% }) %>
                 </select><br>
-                <label>Tag 3 </label>
+            <label>Tag 3 </label>
                 <select id="tag3_select" name="tag3_select" style="float: right">
-                <option></option>
-                    <% tags.forEach(function(tag){ %>
-                        <option><%= tag.tag_name %></option>
-                    <% }) %>
+                    <option></option>
+                        <% tags.forEach(function(tag){ %>
+                            <option><%= tag.tag_name %></option>
+                        <% }) %>
                 </select><br>
             <div class="form-group">
               <label>Bio </label>
-              <input type="text" class="form-control" id="bio_box" placeholder="Say something about yourself">
+              <textarea name="bio" class="form-control" id="bio_box" placeholder="Say something about yourself"></textarea>
             </div>
+            <input type="hidden" name="coord_long" id="coord_long" value="">
+            <input type="hidden" name="coord_lat" id="coord_lat" value="">
             <button type="submit" class="btn btn-primary" id="finish_this_button">Submit</button>
     </form>
-    <!-- <% if (error){ %>
-        <% if (error == "missing") { %>
-            Incomplete Form
-            <% } %>
-        <% if (error == "mismatch") { %>
-            Passwords Do Not Match
-            <% } %>
-        <% if (error == "pass") { %>
-            Check email for verification code
-            <% } %>
-        <% if (error == "exists") { %>
-            Username or Email in use
-            <% } %>
-        <% } %> -->
-
+    <% if (error){ %>
+        <p><%= error %></p>
+        <% } %>
 </div>
-            
-    <% include partials/footer %>
+<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+<div id="map"></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4cJ_DoiJtOI8I0Hx7tMQ8VGbrl5ImH3E&libraries=places&callback=initAutocomplete" async defer></script>
+<script src="/js/registration.js"></script>
+
+<% include partials/footer %>

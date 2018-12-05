@@ -96,13 +96,20 @@
                                                                 <i id="profile_hearts<%= i + 1 %>" class="far fa-star"></i>
                                                                 <% i++;
                                                             } 
-                                                        } else { %>
-                                                            <i onclick="rating(event)" id="profile_heart1" class="far fa-star" stule="width: 12px;"></i>
-                                                            <i onclick="rating(event)" id="profile_heart2" class="far fa-star" stule="width: 12px;"></i>
-                                                            <i onclick="rating(event)" id="profile_heart3" class="far fa-star" stule="width: 12px;"></i>
-                                                            <i onclick="rating(event)" id="profile_heart4" class="far fa-star" stule="width: 12px;"></i>
-                                                            <i onclick="rating(event)" id="profile_heart5" class="far fa-star" stule="width: 12px;"></i>
-                                                            <% } %>
+                                                        } %>
+                                                        <form action="/like_me" method="POST" style="color: black">
+                                                            <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+                                                            <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
+                                                            <select name="love_level">
+                                                                <option></option>
+                                                                <option>1</option>
+                                                                <option>2</option>
+                                                                <option>3</option>
+                                                                <option>4</option>
+                                                                <option>5</option>
+                                                            </select>
+                                                            <button type="submit">Rate!</button>
+                                                        </form>
                                                         </div>
                                                         
                                                     </div> 

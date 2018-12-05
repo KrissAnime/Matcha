@@ -417,7 +417,7 @@ for (const item of users){
   });
   var index = 1;
   fs.readdirSync(temp_dir).forEach(file => {
-    if (file[0] != "." && index < 5 && file.length > 7){
+    if (file[0] != "." && index < 5 && file.length >= 5){
       sql = "UPDATE `matcha`.`images` SET `img_0" + index + "` = ";
       sql += "'" + file + "' WHERE `images`.`unique_key` = '" + unique_key + "'";
       index++;

@@ -3,7 +3,7 @@
         <%- include('partials/header', {session: session}); %>
 </header>
 
-<div id="matcha-chat">
+<div id="matcha-chat" style="overflow: auto">
     <div id="chat-window">
         <div id="old_output">
             <% messages.forEach(function(message){ 

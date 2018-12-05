@@ -99,7 +99,6 @@ io.on('connection', function (socket) {
     // console.log('Made socket connection');
     
     socket.on('chat', function (data) {
-        // io.sockets.emit('chat', data);
         sql = "INSERT INTO `matcha`.`messaging` (`sender`, `receiver`, `message`)";
         sql += " VALUES (?, ?, ?)";
         con.query(sql, [data.chat_mate, data.my_key, data.message], function (err, result) {
@@ -113,9 +112,28 @@ io.on('connection', function (socket) {
     });
     
     socket.on('rate', function (data) {
-        console.log(data);
-        io.sockets.emit('rate', data);
-        
+        var sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles` WHERE `unique_key` = ? OR `unique_key` = ?";
+        con.query(sql, [data.rator, data.rated], function (err, result){
+            if (err){
+                console.log(err);
+            } else {
+                if (result[0].unique_key == data.rator){
+                    var rator = result[0].user_name;
+                    var rated = result[1].user_name;
+                } else {
+                    var rator = result[1].user_name;
+                    var rated = result[0].user_name;
+                }
+                var sql2 = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`) VALUES (?, ?, ?, ?)";
+                con.query(sql2, [rator, 'Rate', rated, 'You recieved a rating of ' + data.rating], function(err2, result2){
+                    if (err2){
+                        console.log(err2);
+                    } else {
+                        io.sockets.emit('rate', data);
+                    }
+                })
+            }
+        })
     });
 });
 
@@ -189,21 +207,22 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                         if (err2) {
                                             console.log(err2);
                                         } else {
-                                            // console.log(result3);
+                                            console.log(result3);
                                             if (result3[0]){
                                                 var rate = result3[0].rating;
                                             } else {
                                                 var rate = 0;
                                             }
-                                            var data = {
-                                                email: result4[0].email,
-                                                text: req.session.username + " visited your profile.\nYou can visit their profile here http://localhost:3000/profiles/" + my_key,
-                                                subject: "Matcha Visitation"
-                                            }
-                                            functions.mailman(data, function(call_err, resp){
-                                                if (call_err){
-                                                    console.log(call_err);
+                                            var sql_note = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`, `logged`) VALUES (?, ?, ?, ?, ?)";
+                                            con.query(sql_note, [result[0].user_name, 'Visit', req.session.username, 'Your profile was visited by user', '0'], function(err_note, result_note){
+                                                if (err_note){
+                                                    console.log(err_note);
                                                 } else {
+                                                    io.sockets.emit('visit', {
+                                                        my_key: my_key,
+                                                        their_key: req.params.unique_key,
+                                                    });
+                                                    console.log('Visitation Logged');
                                                     sql = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE (`receiver` = ? AND `instigator` = ?) OR (`receiver` = ? AND `instigator` = ?)";
                                                     con.query(sql, [my_key, req.params.unique_key, req.params.unique_key, my_key], function(err5, result5){
                                                         if (err5){
@@ -234,9 +253,8 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                                             });
                                                         }
                                                     });
-                                                    
                                                 }
-                                            });
+                                            })
                                         }
                                     });
                                 }
@@ -290,6 +308,9 @@ app.get('/profile', function (req, res) {
 // Notifications Page
 app.get('/notifications', function (req, res) {
     if (req.session.username) {
+        io.sockets.emit('notice', {
+            notice: 'clear',
+        })
         sql = "SELECT * FROM `matcha`.`notifications` WHERE `user_name` = ?";
         con.query(sql, [req.session.username], function (err, result) {
             if (err) {
@@ -418,7 +439,7 @@ app.get('/editing/:unique_key', function(req, res, next){
                 empty = "";
                 res.render('editing',
                 {
-                    session: empty,
+                    session: req.session.username,
                     error: empty,
                     tags: result2,
                 });
@@ -426,6 +447,49 @@ app.get('/editing/:unique_key', function(req, res, next){
         });
     } else {
         res.redirect('/')
+    }
+});
+
+//Editing page
+app.post('/editing/:unique_key', function(req, res, next){
+    if (req.session.username){
+        sql2 = "SELECT `tag_name` FROM `matcha`.`tags`";
+        con.query(sql2, function(err, result2){
+            if (err){
+                console.log(err);
+            } else {
+                var prof_data = {
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
+                    email: req.body.email,
+                    password: req.body.password,
+                    mpassword: req.body.mpassword,
+                    age: req.body.user_age,
+                    gender: req.body.gender,
+                    sexual_pref: req.body.sexual_pref,
+                    tag_1: req.body.tag1_select,
+                    tag_2: req.body.tag2_select,
+                    tag_3: req.body.tag3_select,
+                    bio: req.body.bio,
+                    session: req.session.username
+                }
+                functions.update_profile(prof_data, function(call_err, resp){
+                    if (call_err){
+                        res.render('editing',
+                        {
+                            session: req.session.username,
+                            error: call_err,
+                            tags: result2,
+                        });
+                    } else {
+                        res.redirect('/profile');
+                        
+                    }
+                });
+            }
+        });
+    } else {
+        res.redirect('/');
     }
 });
 
@@ -844,46 +908,84 @@ app.post('/block', function (req, res) {
 
 //Rating a user
 app.post('/like_me', function (req, res) {
-    sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = ?";
-    con.query(sql, [req.body.session], function(err, result){
-        if (err){
-            console.log(err);
-        } else {
-            var my_key = result[0].unique_key;
-            // console.log(my_key);
-            sql2 = "SELECT `rating` FROM `matcha`.`rating` WHERE `rator` = ? AND `rated` = ?";
-            con.query(sql2, [my_key, req.body.hidden_key], function(err2, result2){
-                if (err2){
-                    console.log(err2);
-                } else {
-                    if (result2[0]){
-                        if (req.body.love_level == result2[0].rating){
-                            var love_me = 0;
-                        } else {
-                            var love_me = req.body.love_level;
-                        }
-                        sql3 = "UPDATE `matcha`.`rating` SET `rating` = ? WHERE `rator` = ? AND `rated` = ?";
-                        con.query(sql3, [love_me, my_key, req.body.hidden_key], function(err3, result3){
-                            if (err3){
-                                console.log(err3);
-                            } else {
-                                res.redirect("./profiles/" + req.body.hidden_key);
-                            }
-                        });
+    if (req.session.username){
+        sql = "SELECT `unique_key`, `fame_rating`, `user_name` FROM `matcha`.`profiles` WHERE `unique_key` = ?";
+        con.query(sql, [req.body.hidden_key], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                var sql_notice = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`) VALUES (?, ?, ?, ?)";
+                con.query(sql_notice, [result[0].user_name, 'Rate', req.session.username, 'You profile was rated by'], function(err_not, res_not){
+                    if (err_not){
+                        console.log(err_not);
                     } else {
-                        sql3 = "INSERT INTO `matcha`.`rating` (`rator`, `rated`, `rating`) VALUES (?, ?, ?)";
-                        con.query(sql3, [my_key, req.body.hidden_key, req.body.love_level], function(err3, result3){
-                            if (err3){
-                                console.log(err3);
+                        var current_rate = Number(result[0].fame_rating);
+                        var my_key = req.body.my_key;
+                        var sql4 = "SELECT COUNT(*) AS `num_rates` FROM `matcha`.`rating` WHERE `rated` = ?";
+                        con.query(sql4, [req.body.hidden_key], function(err4, result4){
+                            if (err4){
+                                console.log(err4);
                             } else {
-                                res.redirect("./profiles/" + req.body.hidden_key);
+                                var avg = Number(result4[0].num_rates);
+                                if (avg){
+                                    avg += 1;
+                                } else {
+                                    avg += 2;
+                                }
+                                var new_rate = Math.round((current_rate + Number(req.body.love_level)) / (avg));
+                                var sql5 = "UPDATE `matcha`.`profiles` SET `fame_rating` = ? WHERE `unique_key` = ?";
+                                con.query(sql5, [new_rate, req.body.hidden_key], function(err5, result5){
+                                    if (err5){
+                                        console.log(err5);
+                                    } else {
+                                        console.log('Fame Rating Updated');
+                                        sql2 = "SELECT `rating` FROM `matcha`.`rating` WHERE `rator` = ? AND `rated` = ?";
+                                        con.query(sql2, [my_key, req.body.hidden_key], function(err2, result2){
+                                            if (err2){
+                                                console.log(err2);
+                                            } else {
+                                                io.sockets.emit('rate', {
+                                                    rating: req.body.love_level,
+                                                    rator: req.body.hidden_key, 
+                                                    rated: my_key
+                                                });
+                                                if (result2[0]){
+                                                    if (req.body.love_level == result2[0].rating){
+                                                        var love_me = 0;
+                                                    } else {
+                                                        var love_me = req.body.love_level;
+                                                    }
+                                                    sql3 = "UPDATE `matcha`.`rating` SET `rating` = ? WHERE `rator` = ? AND `rated` = ?";
+                                                    con.query(sql3, [love_me, my_key, req.body.hidden_key], function(err3, result3){
+                                                        if (err3){
+                                                            console.log(err3);
+                                                        } else {
+                                                            res.redirect("./profiles/" + req.body.hidden_key);
+                                                        }
+                                                    });
+                                                } else {
+                                                    sql3 = "INSERT INTO `matcha`.`rating` (`rator`, `rated`, `rating`) VALUES (?, ?, ?)";
+                                                    con.query(sql3, [my_key, req.body.hidden_key, req.body.love_level], function(err3, result3){
+                                                        if (err3){
+                                                            console.log(err3);
+                                                        } else {
+                                                            res.redirect("./profiles/" + req.body.hidden_key);
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
                             }
-                        });
+                        })
                     }
-                }
-            });
-        }
-    });
+                });
+            }
+        });
+    } else {
+        res.redirect('/');
+    }
 });
 
 app.post('/upload', function(req, res){
@@ -892,14 +994,13 @@ app.post('/upload', function(req, res){
             if (err){
                 console.log(err);
             } else {
-                console.log(req.body.photo);
                 if (req.body.photo != 'e'){
                     var sql = "UPDATE `matcha`.`images` SET `img_0" + req.body.photo + "` = ? WHERE `unique_key` = ?";
                     con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
                         if (err){
                             console.log(err);
                         } else {
-                            console.log("Image Update Successful");
+                            console.log("Image Table Update Successful");
                         }
                     });
                 } else {
@@ -908,19 +1009,19 @@ app.post('/upload', function(req, res){
                         if (err){
                             console.log(err);
                         } else {
-                            console.log("Image Update Successful");
+                            var sql = "UPDATE `matcha`.`users` SET `profile` = ? WHERE `unique_key` = ?";
+                            con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                    console.log("User Table Update Successful");
+                                    res.redirect('./profile');
+                                }
+                            });
                         }
                     });
                 }
-                var sql = "UPDATE `matcha`.`users` SET `profile` = ? WHERE `unique_key` = ?";
-                con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
-                    if (err){
-                        console.log(err);
-                    } else {
-                        console.log("Image Update Successful");
-                        res.redirect('./profile');
-                    }
-                });
+                
             }
         });
     } else {
