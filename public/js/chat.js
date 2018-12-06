@@ -18,7 +18,13 @@ send_message.addEventListener('click', function(){
         my_key: my_key.value
     });
     message.value = "";
-})
+
+    socket.emit('new_message', {
+        messages: 0,
+        my_key: my_key.value,
+        chat_mate: chat_mate.value
+    });
+});
 
 //Listen for events
 socket.on('chat', function(data){

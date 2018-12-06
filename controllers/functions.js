@@ -490,31 +490,31 @@ module.exports.check_my_registration = function (reg_me, callback){
             var geo = geoip.lookup(ip);
             reg_me.long = geo.ll[1];
             reg_me.lat = geo.ll[1];
-        });
-        var tag_list = reg_me.tag_1 + ", " + reg_me.tag_2 + ", " + reg_me.tag_3;
-        var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
-        con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
-            if (err){
-                console.log(err);
-            } else {
-                console.log('User profile table updated succesfully');
-                sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
-                con.query(sql2, [reg_me.key], function(err2, res2){
-                    if (err2){
-                        console.log(err2);
-                    } else {
-                        sql3 = "INSERT INTO `matcha`.`images` (`unique_key`) VALUES (?)";
-                        con.query(sql3, [reg_me.key], function(err3, result3){
-                            if (err3){
-                                console.log(err3);
-                            }else {
-                                console.log('User verification succesful');
-                                callback(null, "success");
-                            }
-                        });
-                    }
-                });
-            }
+            var tag_list = reg_me.tag_1 + ", " + reg_me.tag_2 + ", " + reg_me.tag_3;
+            var sql = "UPDATE `matcha`.`profiles` SET `age` = ?, `gender` = ?, `sexual_pref` = ?, `bio` = ?, `interests` = ?, `location_lat` = ?, `location_long` = ? WHERE `matcha`.`profiles`.`unique_key` = ?";
+            con.query(sql, [reg_me.age, reg_me.gender, reg_me.sexual_pref, reg_me.bio, tag_list, reg_me.lat, reg_me.long, reg_me.key], function(err, result){
+                if (err){
+                    console.log(err);
+                } else {
+                    console.log('User profile table updated succesfully');
+                    sql2 = "UPDATE `matcha`.`users` SET `verified` = 1 WHERE `matcha`.`users`.`unique_key` = ?";
+                    con.query(sql2, [reg_me.key], function(err2, res2){
+                        if (err2){
+                            console.log(err2);
+                        } else {
+                            sql3 = "INSERT INTO `matcha`.`images` (`unique_key`) VALUES (?)";
+                            con.query(sql3, [reg_me.key], function(err3, result3){
+                                if (err3){
+                                    console.log(err3);
+                                }else {
+                                    console.log('User verification succesful');
+                                    callback(null, "success");
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     } else {
         var tag_list = reg_me.tag_1 + "," + reg_me.tag_2 + "," + reg_me.tag_3;
@@ -731,4 +731,20 @@ module.exports.update_profile = function(prof_data, callback){
                 })
             }
         });
+    }
+    
+    module.exports.block_messages = function(users, my_key, callback){
+        users.forEach(element => {
+            var block_sql = "SELECT * FROM `matcha`.`block` WHERE (`sender` = ? AND `receiver` = ?) OR (`sender` = ? AND `receiver` = ?)";
+            con.query(block_sql, [my_key, element.unique_key, element.unique_key, my_key], function(block_err, block_res){
+                if (block_err){
+                    console.log(block_err);
+                } else {
+                    if (block_res[0]){
+                        element.unique_key = "NULL";
+                    }
+                }
+            })
+        });
+        callback(null, users);
     }

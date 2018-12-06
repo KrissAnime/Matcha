@@ -19,6 +19,10 @@
 	</div>
 </div>
 
+<div id='new_notifications' style="width: 10%; background-color: orange; float: left"></div>
+<form>
+        <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+    </form>
 <div class="user_profiles">
     <% users.forEach(function(user){ %>
         <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].profile %>')">
@@ -57,11 +61,11 @@
                             <% } %>
                         </tr>
                             <tr>
-                                <td><%= user.sexual_pref %></td>
+                                <td>Interested in: <%= user.sexual_pref %></td>
                             <td></td>
                         </tr> 
                     </table>
-                    <a href="../../editing/<%= user_key %>" ><button type="button" class="btn btn-secondary">Edit Details</button> </a> 
+                    <a href="../../editing/<%= user_key %>" ><button type="button" class="btn btn-secondary">Edit Details</button> </a>
             </div>
                                         <div id="user_other_details">
                                             <div id="container" style="padding: 10px; color: white">
@@ -78,6 +82,6 @@
                                                     <% }) %>
                                                     <% }) %>
                                                 </div>
-                                                <script src="/js/profile.js">
-                                                </script>
+                                                <script src="/js/profile.js"></script>
+                                                <script src="/js/notifications.js"></script>
                                                 <% include partials/footer %>

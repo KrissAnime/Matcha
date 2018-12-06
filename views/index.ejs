@@ -5,6 +5,10 @@
 <header>
     <%- include('partials/header', {session: session}); %>
 </header>
+<div id='new_notifications' style="width: 10%; background-color: orange; float: left"></div>
+<form>
+    <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+</form>
 <div class='central_grid' l3 s2>
     <% users.forEach(function(user){ 
         if (user.unique_key != "NULL"){%>
@@ -33,5 +37,6 @@
                     </div>
                 <% }}) %>
             </div>
+            <script src="/js/notifications.js"></script>
             <% include partials/footer %>
             

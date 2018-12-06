@@ -16,6 +16,7 @@ const functions = require('./controllers/functions.js');
 const socket = require('socket.io');
 const multer = require('multer');
 const mkdirp = require('mkdirp');
+const fs = require('fs');
 
 var con = mysql.createConnection({
     socketPath: '/goinfre/cbester/Desktop/mamp_server/mysql/tmp/mysql.sock',
@@ -96,7 +97,7 @@ function checkFileType(file, callback){
 var io = socket(server);
 
 io.on('connection', function (socket) {
-    // console.log('Made socket connection');
+    // Made socket connection
     
     socket.on('chat', function (data) {
         sql = "INSERT INTO `matcha`.`messaging` (`sender`, `receiver`, `message`)";
@@ -105,36 +106,82 @@ io.on('connection', function (socket) {
             if (err) {
                 console.log(err);
             } else {
-                io.sockets.emit('chat', data);
-            }
-        });
-        // console.log(data.chat_mate);
-    });
-    
-    socket.on('rate', function (data) {
-        var sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles` WHERE `unique_key` = ? OR `unique_key` = ?";
-        con.query(sql, [data.rator, data.rated], function (err, result){
-            if (err){
-                console.log(err);
-            } else {
-                if (result[0].unique_key == data.rator){
-                    var rator = result[0].user_name;
-                    var rated = result[1].user_name;
-                } else {
-                    var rator = result[1].user_name;
-                    var rated = result[0].user_name;
-                }
-                var sql2 = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`) VALUES (?, ?, ?, ?)";
-                con.query(sql2, [rator, 'Rate', rated, 'You recieved a rating of ' + data.rating], function(err2, result2){
-                    if (err2){
-                        console.log(err2);
+                var mes_sql = "SELECT COUNT(*) AS `num_notices` FROM `matcha`.`messaging` WHERE `receiver` = ? AND `logged` = 0";
+                con.query(mes_sql, [data.my_key], function(mes_err, mes_res){
+                    if (mes_err){
+                        console.log(mes_err);
                     } else {
-                        io.sockets.emit('rate', data);
+                        io.sockets.emit('chat', data);
+                        console.log(mes_res);
+                        io.sockets.emit('new_message', {
+                            chat_mate: data.my_key,
+                            messages: mes_res[0].num_notices,
+                            my_key: data.chat_mate
+                        });
                     }
                 })
             }
-        })
+        });
     });
+    
+    socket.on('visit', function (data){
+        var who_sql = "SELECT `user_name` FROM `matcha`.`users` WHERE `unique_key` = ?";
+        con.query(who_sql, [data.my_key], function(err_who, res_who){
+            if (err_who){
+                console.log(err_who);
+            } else {
+                var visit_sql = "SELECT COUNT(*) AS `num_notices` FROM `matcha`.`notifications` WHERE `user_name` = ? AND `logged` = 0";
+                con.query(visit_sql, [res_who[0].user_name], function(err_vis, res_vis){
+                    if (err_vis){
+                        console.log(err_vis);
+                    } else {
+                        data.notices = res_vis[0].num_notices;
+                        io.sockets.emit('visit', data);
+                    }
+                });
+            }
+        });
+    });
+    
+    socket.on('block', function (data){
+        var who_sql = "SELECT `user_name` FROM `matcha`.`users` WHERE `unique_key` = ?";
+        con.query(who_sql, [data.my_key], function(err_who, res_who){
+            if (err_who){
+                console.log(err_who);
+            } else {
+                var visit_sql = "SELECT COUNT(*) AS `num_notices` FROM `matcha`.`notifications` WHERE `user_name` = ? AND `logged` = '0'";
+                con.query(visit_sql, [res_who[0].user_name], function(err_vis, res_vis){
+                    if (err_vis){
+                        console.log(err_vis);
+                    } else {
+                        data.notices = res_vis[0].num_notices;
+                        io.sockets.emit('block', data);
+                    }
+                });
+            }
+        });
+    });
+    
+    socket.on('rate', function (data){
+        var who_sql = "SELECT `user_name` FROM `matcha`.`users` WHERE `unique_key` = ?";
+        con.query(who_sql, [data.my_key], function(err_who, res_who){
+            if (err_who){
+                console.log(err_who);
+            } else {
+                var visit_sql = "SELECT COUNT(*) AS `num_notices` FROM `matcha`.`notifications` WHERE `user_name` = ? AND `logged` = '0'";
+                con.query(visit_sql, [res_who[0].user_name], function(err_vis, res_vis){
+                    if (err_vis){
+                        console.log(err_vis);
+                    } else {
+                        data.notices = res_vis[0].num_notices;
+                        io.sockets.emit('rate', data);
+                    }
+                });
+            }
+        });
+    });
+    
+    
 });
 
 // Home Page
@@ -162,7 +209,8 @@ app.get('/', function (req, res) {
                                     } else {
                                         res.render('index', {
                                             users: response,
-                                            session: req.session.username
+                                            session: req.session.username,
+                                            my_key: result3[0].unique_key
                                         });
                                     }
                                 });
@@ -207,7 +255,6 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                         if (err2) {
                                             console.log(err2);
                                         } else {
-                                            console.log(result3);
                                             if (result3[0]){
                                                 var rate = result3[0].rating;
                                             } else {
@@ -218,10 +265,6 @@ app.get('/profiles/:unique_key', function (req, res, next) {
                                                 if (err_note){
                                                     console.log(err_note);
                                                 } else {
-                                                    io.sockets.emit('visit', {
-                                                        my_key: my_key,
-                                                        their_key: req.params.unique_key,
-                                                    });
                                                     console.log('Visitation Logged');
                                                     sql = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE (`receiver` = ? AND `instigator` = ?) OR (`receiver` = ? AND `instigator` = ?)";
                                                     con.query(sql, [my_key, req.params.unique_key, req.params.unique_key, my_key], function(err5, result5){
@@ -294,7 +337,8 @@ app.get('/profile', function (req, res) {
                             images: result2,
                             users: result,
                             session: req.session.username,
-                            user_key: user_key
+                            user_key: user_key,
+                            my_key: result[0].unique_key
                         });
                     }
                 })
@@ -308,9 +352,6 @@ app.get('/profile', function (req, res) {
 // Notifications Page
 app.get('/notifications', function (req, res) {
     if (req.session.username) {
-        io.sockets.emit('notice', {
-            notice: 'clear',
-        })
         sql = "SELECT * FROM `matcha`.`notifications` WHERE `user_name` = ?";
         con.query(sql, [req.session.username], function (err, result) {
             if (err) {
@@ -321,13 +362,20 @@ app.get('/notifications', function (req, res) {
                     if (err2) {
                         console.log(err2);
                     } else {
-                        var check = result[0];
-                        res.render('notifications',
-                        {
-                            session: req.session.username,
-                            result: result,
-                            users: result2,
-                            check: check
+                        var sql3 = "UPDATE `matcha`.`notifications` SET `logged` = 1 WHERE `user_name` = ?";
+                        con.query(sql3, [req.session.username], function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            } else {
+                                console.log('Notifcations set to read');
+                                res.render('notifications',
+                                {
+                                    session: req.session.username,
+                                    result: result,
+                                    users: result2,
+                                    my_key: result2[0].unique_key
+                                });
+                            }
                         });
                     }
                 });
@@ -356,24 +404,28 @@ app.get('/messages', function (req, res) {
                             if (call_err) {
                                 console.log(call_err);
                             } else {
-                                // console.log(resp);
                                 sql = "SELECT `user_name`, `unique_key` FROM `matcha`.`profiles`";
                                 con.query(sql, function (err3, result3) {
                                     if (err3) {
                                         console.log(err3);
                                     } else {
-                                        res.render('messages',
-                                        {
-                                            session: req.session.username,
-                                            messages: resp,
-                                            users: result3,
-                                            my_key: key
+                                        functions.block_messages(result3, key, function(call_block_err, block_resp){
+                                            if (call_block_err){
+                                                console.log(call_block_err);
+                                            } else {
+                                                res.render('messages',
+                                                {
+                                                    session: req.session.username,
+                                                    messages: resp,
+                                                    users: block_resp,
+                                                    my_key: key
+                                                });
+                                            }
                                         });
                                     }
                                 });
                             }
                         });
-                        
                     }
                 });
             }
@@ -437,12 +489,21 @@ app.get('/editing/:unique_key', function(req, res, next){
                 console.log(err);
             } else {
                 empty = "";
-                res.render('editing',
-                {
-                    session: req.session.username,
-                    error: empty,
-                    tags: result2,
-                });
+                var sql_key = "SELECT `unique_key` FROM `matcha`.`users` WHERE `user_name` = ?";
+                con.query(sql_key, [req.session.username], function(err_key, res_key){
+                    if (err_key){
+                        console.log(err_key);
+                    } else {
+                        res.render('editing',
+                        {
+                            session: req.session.username,
+                            error: empty,
+                            tags: result2,
+                            my_key: res_key[0].unique_key
+                        });
+                    }
+                })
+                
             }
         });
     } else {
@@ -778,7 +839,6 @@ app.get('/search', function (req, res) {
                         }
                     }
                     if (data) {
-                        
                         functions.search_and_recover(data, function (call_err, resp) {
                             if (call_err) {
                                 console.log(call_err);
@@ -799,7 +859,8 @@ app.get('/search', function (req, res) {
                         {
                             tags: result,
                             matches: matches,
-                            session: req.session.username
+                            session: req.session.username,
+                            my_key: result2[0].unique_key
                         });
                     }
                 });
@@ -814,55 +875,52 @@ app.get('/search', function (req, res) {
 
 //Likes a user profile
 app.post('/like', function (req, res) {
-    sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = ?";
-    con.query(sql, [req.body.session], function(err, result){
-        if (err){
-            console.log(err);
-        } else {
-            var my_key = result[0].unique_key;
-            sql2 = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE `instigator` = ? AND `receiver` = ?";
-            con.query(sql2, [my_key, req.body.hidden_key], function(err2, result2){
-                if (err2){
-                } else {
-                    var subject = "Matcha Like Alert";
-                    if (result2[0]){
-                        sql3 = "DELETE FROM `matcha`.`likes` WHERE `instigator` = ? AND `receiver` = ?";
-                        var message = "It looks like " + req.body.session + " no longer likes you! :'(";
-                        console.log('User Disliked Someone');
+    if (req.session.username){
+        sql = "SELECT `unique_key` FROM `matcha`.`profiles` WHERE `user_name` = ?";
+        con.query(sql, [req.body.session], function(err, result){
+            if (err){
+                console.log(err);
+            } else {
+                var my_key = result[0].unique_key;
+                sql2 = "SELECT `instigator`, `receiver` FROM `matcha`.`likes` WHERE `instigator` = ? AND `receiver` = ?";
+                con.query(sql2, [my_key, req.body.hidden_key], function(err2, result2){
+                    if (err2){
                     } else {
-                        sql3 = "INSERT INTO `matcha`.`likes` (`instigator`, `receiver`) VALUES (?, ?)";
-                        var message = "It looks like " + req.body.session + " likes you! :) Maybe you should like them back?\nLogin now and check out their profile page!\n\nhttp://localhost:3000/profiles/" + my_key;
-                        console.log('User Liked Someone');
-                    }
-                    con.query(sql3, [my_key, req.body.hidden_key], function(err3, result3){
-                        if (err3){
-                            console.log(err3);
+                        if (result2[0]){
+                            sql3 = "DELETE FROM `matcha`.`likes` WHERE `instigator` = ? AND `receiver` = ?";
+                            console.log('User Disliked Someone');
                         } else {
-                            sql4 = "SELECT `matcha`.`users`.`email`, `matcha`.`users`.`user_name` FROM `matcha`.`users` INNER JOIN `matcha`.`profiles` ON `matcha`.`users`.`user_name` = `matcha`.`profiles`.`user_name` WHERE `matcha`.`profiles`.`unique_key` = '" + req.body.hidden_key + "'";
-                            con.query(sql4, function(err4, result4){
-                                if (err4){
-                                    console.log(err4);
-                                } else {
-                                    var data = {
-                                        email: result4[0].email,
-                                        subject: subject,
-                                        text: message
-                                    }
-                                    functions.mailman(data, function(err_mail, resp_mail){
-                                        if (err_mail){
-                                            console.log(err_mail);
-                                        } else {
-                                            res.redirect("./profiles/" + req.body.hidden_key);
-                                        }
-                                    })
-                                }
-                            })
+                            sql3 = "INSERT INTO `matcha`.`likes` (`instigator`, `receiver`) VALUES (?, ?)";
+                            console.log('User Liked Someone');
                         }
-                    })
-                }
-            })
-        }
-    });
+                        con.query(sql3, [my_key, req.body.hidden_key], function(err3, result3){
+                            if (err3){
+                                console.log(err3);
+                            } else {
+                                sql4 = "SELECT `matcha`.`users`.`email`, `matcha`.`users`.`user_name` FROM `matcha`.`users` INNER JOIN `matcha`.`profiles` ON `matcha`.`users`.`user_name` = `matcha`.`profiles`.`user_name` WHERE `matcha`.`profiles`.`unique_key` = ?";
+                                con.query(sql4, [req.body.hidden_key], function(err4, result4){
+                                    if (err4){
+                                        console.log(err4);
+                                    } else {
+                                        var sql_notice = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`, `logged`) VALUES (?, ?, ?, ?, 0)";
+                                        con.query(sql_notice, [result4[0].user_name, 'Like', req.session.username, "You're profile was liked by user"], function(notice_err, notice_res){
+                                            if (notice_err){
+                                                console.log(notice_err);
+                                            } else {
+                                                res.redirect("./profiles/" + req.body.hidden_key);
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        });
+    } else {
+        res.redirect('./');
+    }
 });
 
 //Blocks a user profile
@@ -886,18 +944,14 @@ app.post('/block', function (req, res) {
                         if (err4){
                             console.log(err4);
                         } else {
-                            var data = {
-                                email: result4[0].email,
-                                subject: subject,
-                                text: message
-                            }
-                            functions.mailman(data, function(err_mail, resp_mail){
-                                if (err_mail){
-                                    console.log(err_mail);
+                            var sql_notice = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`, `logged`) VALUES (?, ?, ?, ?, 0)";
+                            con.query(sql_notice, [req.session.username, 'Block', result4[0].user_name, 'You Were Blocked By A User'], function(notice_err, notice_res){
+                                if (notice_err){
+                                    console.log(notice_err);
                                 } else {
-                                    res.redirect('./')
+                                    res.redirect('./');
                                 }
-                            });
+                            })
                         }
                     });
                 }
@@ -914,7 +968,7 @@ app.post('/like_me', function (req, res) {
             if (err){
                 console.log(err);
             } else {
-                var sql_notice = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`) VALUES (?, ?, ?, ?)";
+                var sql_notice = "INSERT INTO `matcha`.`notifications` (`user_name`, `action`, `instigator`, `notify`, `logged`) VALUES (?, ?, ?, ?, 0)";
                 con.query(sql_notice, [result[0].user_name, 'Rate', req.session.username, 'You profile was rated by'], function(err_not, res_not){
                     if (err_not){
                         console.log(err_not);
@@ -995,33 +1049,69 @@ app.post('/upload', function(req, res){
                 console.log(err);
             } else {
                 if (req.body.photo != 'e'){
-                    var sql = "UPDATE `matcha`.`images` SET `img_0" + req.body.photo + "` = ? WHERE `unique_key` = ?";
-                    con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
-                        if (err){
-                            console.log(err);
+                    var del_sql = "SELECT `img_0" + req.body.photo + "` AS `name` FROM `matcha`.`images` WHERE `unique_key` = ?";
+                    con.query(del_sql, [req.body.unique_key], function(del_err, del_res){
+                        if (del_err){
+                            console.log(del_err);
                         } else {
-                            console.log("Image Table Update Successful");
-                        }
-                    });
-                } else {
-                    var sql = "UPDATE `matcha`.`images` SET `profile` = ? WHERE `unique_key` = ?";
-                    con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
-                        if (err){
-                            console.log(err);
-                        } else {
-                            var sql = "UPDATE `matcha`.`users` SET `profile` = ? WHERE `unique_key` = ?";
+                            if (del_res[0].name){
+                                var filePath = './public/extra/profiles/' + req.session.username + "/" + del_res[0].name;
+                                fs.access(filePath, error => {
+                                    if (error) {
+                                        console.log(error);
+                                    } else {
+                                        fs.unlinkSync(filePath);
+                                        console.log("Old Image Deleted");
+                                    }
+                                });
+                            }
+                            var sql = "UPDATE `matcha`.`images` SET `img_0" + req.body.photo + "` = ? WHERE `unique_key` = ?";
                             con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
                                 if (err){
                                     console.log(err);
                                 } else {
-                                    console.log("User Table Update Successful");
-                                    res.redirect('./profile');
+                                    console.log("Image Table Update Successful");
+                                }
+                            });
+                        }
+                    })
+                    
+                } else {
+                    var del_sql = "SELECT `profile` AS `name` FROM `matcha`.`images` WHERE `unique_key` = ?";
+                    con.query(del_sql, [req.body.unique_key], function(del_err, del_res){
+                        if (del_err){
+                            console.log(del_err);
+                        } else {
+                            if (del_res[0].name){
+                                var filePath = './public/extra/profiles/' + req.session.username + "/" + del_res[0].name;
+                                fs.access(filePath, error => {
+                                    if (error) {
+                                        console.log(error);
+                                    } else {
+                                        fs.unlinkSync(filePath);
+                                        console.log("Old Image Deleted");
+                                    }
+                                });
+                            }
+                            var sql = "UPDATE `matcha`.`images` SET `profile` = ? WHERE `unique_key` = ?";
+                            con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                    var sql = "UPDATE `matcha`.`users` SET `profile` = ? WHERE `unique_key` = ?";
+                                    con.query(sql, [req.file.filename, req.body.unique_key], function(err, result){
+                                        if (err){
+                                            console.log(err);
+                                        } else {
+                                            console.log("User Table Update Successful");
+                                            res.redirect('./profile');
+                                        }
+                                    });
                                 }
                             });
                         }
                     });
                 }
-                
             }
         });
     } else {

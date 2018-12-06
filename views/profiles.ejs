@@ -7,14 +7,17 @@
 	<br/>
 	<div id='image_box'>
 		<span class='close' style='color: white'>&times;</span>
-			<div id='modal_image'>
-            </div>
-            
-			<br/>
+        <div id='modal_image'>
+        </div>
+        
+        <br/>
     </div>
-    
 </div>
 
+<div id='new_notifications' style="width: 10%; background-color: orange; float: left"></div>
+<form>
+    <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+</form>
 <div class="user_profiles">
     <% users.forEach(function(user){ %>
         <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= user.profile %>')" id="user_bio_profile" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= user.profile %>')">
@@ -34,50 +37,50 @@
                         <tr><%= user.user_name %></tr>
                         <tr>
                             <td>Name: </td>
-                            <td><%= user.first_name %></td>
+                            <td style="float: right"><%= user.first_name %></td>
                         </tr>
                         <tr>
                             <td>Surname: </td>
-                            <td><%= user.last_name %></td>
+                            <td style="float: right"><%= user.last_name %></td>
                         </tr>
                         <tr>
                             <td>Age: </td>
-                            <td><%= user.age %></td>
+                            <td style="float: right"><%= user.age %></td>
                         </tr>
                         <tr>
                             <td>Gender: </td>
                             <% if (user.gender == 1){ %>
-                                <td>Female</td>
-                            <% }else{ %>
-                                <td>Male</td>
-                            <% } %>
-                        </tr>
-                            <tr>
-                                Interested in: <td><%= user.sexual_pref %></td>
-                            <td></td>
-                        </tr> 
-                    </table>
-                    <% if (likeable){ %>
-                        <a href="../../messaging/<%= hidden_key %>" ><button type="button" class="btn btn-secondary">Chat Now!</button> </a>                     
-                    <% } %>
-            </div>
-                                        <div id="user_other_details">
-                                            <div id="container" style="padding: 10px; color: white">
-                                                <% if (user.bio){ %>
-                                                    <p id="user_other_about_me_text"><%= user.bio %></p>
-                                                <% } %>
-                                            </div>
-                                            <% if (control){ %>
-                                                <div class="btn-group" style="margin: auto; margin-left: 43%">
-                                                    <form action="/like" method="POST">
-                                                        <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
-                                                        <input name="session" id="session_name" type="hidden" value="<%= session %>"/>
-                                                        <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
-                                                    <% if (liked){ %>
-                                                        <button id="like_button" type="submit" class="btn btn-warning">Dislike</button>
+                                <td style="float: right">Female</td>
+                                <% }else{ %>
+                                    <td style="float: right">Male</td>
+                                    <% } %>
+                                </tr>
+                                <tr>
+                                    <td>Interested in: </td>
+                                    <td style="float: right"><%= user.sexual_pref %></td>
+                                </tr> 
+                            </table>
+                            <% if (likeable){ %>
+                                <a href="../../messaging/<%= hidden_key %>" ><button type="button" class="btn btn-secondary">Chat Now!</button> </a>                     
+                                <% } %>
+                            </div>
+                            <div id="user_other_details">
+                                <div id="container" style="padding: 10px; color: white">
+                                    <% if (user.bio){ %>
+                                        <p id="user_other_about_me_text"><%= user.bio %></p>
+                                        <% } %>
+                                    </div>
+                                    <% if (control){ %>
+                                        <div class="btn-group" style="margin: auto; margin-left: 43%">
+                                            <form action="/like" method="POST">
+                                                <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
+                                                <input name="session" id="session_name" type="hidden" value="<%= session %>"/>
+                                                <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+                                                <% if (liked){ %>
+                                                    <button id="like_button" type="submit" class="btn btn-warning">Dislike</button>
                                                     <% } else { %>
                                                         <button id="like_button" type="submit" class="btn btn-success">Like</button>
-                                                    <% } %>
+                                                        <% } %>
                                                     </form>
                                                     <form action="/block" method="POST">
                                                         <input name="hidden_key" id="hidden_key" type="hidden" value="<%= hidden_key %>"/>
@@ -108,19 +111,54 @@
                                                                 <option>4</option>
                                                                 <option>5</option>
                                                             </select>
-                                                            <button type="submit">Rate!</button>
+                                                            <button type="submit" id="rate_me">Rate!</button>
                                                         </form>
-                                                        </div>
-                                                        
-                                                    </div> 
-                                                    <% images.forEach(function(image){ %>
-                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_01 %>')"></div>
-                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_02 %>')"></div>
-                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_03 %>')"></div>
-                                                        <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= image.img_04 %>')"></div>
-                                                        <% }) %>
-                                                <% }) %>
+                                                    </div>
+                                                    
                                                 </div>
-                                                <script src="/js/profiles.js">
-                                                </script>
-                                                <% include partials/footer %>
+                                                <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].img_01 %>')" id="user_profile1" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].img_01 %>')"></div>
+                                                <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].img_02 %>')" id="user_profile2" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].img_02 %>')"></div>
+                                                <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].img_03 %>')" id="user_profile3" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].img_03 %>')"></div>
+                                                <div onclick="blowup(event, '/extra/profiles/<%= user.user_name %>/<%= images[0].img_04 %>')" id="user_profile4" style="background-image: url('/extra/profiles/<%= user.user_name %>/<%= images[0].img_04 %>')"></div>
+                                                <% }) %>
+                                            </div>
+                                            <script src="/js/notifications.js"></script>
+                                            <script >
+                                                var like_button = document.getElementById('like_button');
+                                                var block_button = document.getElementById('block_button');
+                                                var my_key = document.getElementById('my_key');
+                                                var hidden_key = document.getElementById('hidden_key');
+                                                var rate_me = document.getElementById('rate_me');
+
+                                                socket.emit('visit', {
+                                                    my_key: my_key.value,
+                                                    their_key: hidden_key.value,
+                                                    notices: 0
+                                                });
+                                                
+                                                like_button.addEventListener('click', function(){
+                                                    socket.emit('like', {
+                                                        my_key: my_key.value,
+                                                        their_key: hidden_key.value,
+                                                        notices: 0
+                                                    });
+                                                });
+
+                                                block_button.addEventListener('click', function(){
+                                                    socket.emit('block', {
+                                                        my_key: my_key.value,
+                                                        their_key: hidden_key.value,
+                                                        notices: 0
+                                                    });
+                                                });
+
+                                                rate_me.addEventListener('click', function(){
+                                                    socket.emit('rate', {
+                                                        my_key: my_key.value,
+                                                        their_key: hidden_key.value,
+                                                        notices: 0
+                                                    });
+                                                });
+                                            </script>
+                                            <script src="/js/profiles.js"></script>
+                                            <% include partials/footer %>

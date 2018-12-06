@@ -3,6 +3,10 @@
         <%- include('partials/header', {session: session}); %>
 </header>
 
+<div id='new_notifications' style="width: 10%; background-color: orange; float: left"></div>
+<form>
+        <input name="my_key" id="my_key" type="hidden" value="<%= my_key %>"/>
+    </form>
 <div class="search_options">
     <form action="" method="GET">
         <input type="number" id="low_age" name="low_age" placeholder="Min-Age" min="18" max="60">
@@ -82,4 +86,5 @@
                                 <% }}) %>
                                 </div>
             <% } %>
+            <script src="/js/notifications.js"></script>
             <% include partials/footer %>

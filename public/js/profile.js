@@ -1,7 +1,6 @@
 //Make socket connection
 var socket = io.connect('http://localhost:3000/');
 
-
 // Get the image and insert it inside the modal - use its "alt" text as a caption
 var modalImg = document.getElementById("modal_image");
 var modal = document.getElementById('myModal');
