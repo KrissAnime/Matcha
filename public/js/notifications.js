@@ -41,7 +41,6 @@ socket.on('like', function(data){
 
 socket.on('new_message', function(data){
     if (data.my_key == my_key.value){
-        console.log(data.messages);
         new_message.innerHTML = data.messages;
         num_notices.classList.remove('far', 'fa-comments');
         num_notices.classList.add('fas', 'fa-comments');

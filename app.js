@@ -112,7 +112,6 @@ io.on('connection', function (socket) {
                         console.log(mes_err);
                     } else {
                         io.sockets.emit('chat', data);
-                        console.log(mes_res);
                         io.sockets.emit('new_message', {
                             chat_mate: data.my_key,
                             messages: mes_res[0].num_notices,
@@ -822,6 +821,7 @@ app.get('/search', function (req, res) {
                         var tag_1 = req.query.tag1_select;
                         var tag_2 = req.query.tag2_select;
                         var tag_3 = req.query.tag3_select;
+                        var sort_by =  req.query.sort_by;
                         if (age_low || age_max || rating || dist || tag_1 || tag_2 || tag_3){
                             var data = {
                                 age_low: age_low,
@@ -832,7 +832,8 @@ app.get('/search', function (req, res) {
                                 tag_2: tag_2,
                                 tag_3: tag_3,
                                 user: req.session.username,
-                                blocker_key: blocker_key
+                                blocker_key: blocker_key,
+                                sort_by: sort_by
                             };
                         } else {
                             var data = null;

@@ -24,7 +24,7 @@ var users = [
         "last_name": "Esdeath",
         "user_name": "Ice Queen",
         "email": "krissultimatum2+iceqeen@gmail.com",
-        "password": "Esdese",
+        "password": "Esdese1",
         "fame_rating": 5,
         "age": 26,
         "gender": "Female",
@@ -44,7 +44,7 @@ var users = [
         "last_name": "Lionelle",
         "user_name": "Cat Girl",
         "email": "krissultimatum2+catgirl@gmail.com",
-        "password": "Neesan",
+        "password": "Neesan1",
         "fame_rating": 4.5,
         "age": 21,
         "gender": "Female",
@@ -64,7 +64,7 @@ var users = [
         "last_name": "Kerrigan",
         "user_name": "Queen of Blades",
         "email": "krissultimatum+bladequeen@gmail.com",
-        "password": "Tusky",
+        "password": "Tusky1",
         "fame_rating": 5,
         "age": 35,
         "gender": "Female",
@@ -84,7 +84,7 @@ var users = [
         "last_name": "Terra",
         "user_name": "Nova",
         "email": "krissultimatum2+nova@gmail.com",
-        "password": "Covert",
+        "password": "Covert1",
         "fame_rating": 4,
         "age": 23,
         "gender": "Female",
@@ -104,7 +104,7 @@ var users = [
         "last_name": "Raven",
         "user_name": "Raven Girl",
         "email": "krissultimatum+ravengirl@gmail.com",
-        "password": "Nexus",
+        "password": "Nexus1",
         "fame_rating": 4,
         "age": 18,
         "gender": "Female",
@@ -124,7 +124,7 @@ var users = [
         "last_name": "Incursio",
         "user_name": "Tyrant",
         "email": "krissultimatum+tyrant@gmail.com",
-        "password": "BroBro",
+        "password": "BroBro1",
         "fame_rating": 3,
         "age": 27,
         "gender": "Male",
@@ -144,7 +144,7 @@ var users = [
         "last_name": "Scarlet",
         "user_name": "Titania",
         "email": "krissultimatum+titania@gmail.com",
-        "password": "Nightwalker",
+        "password": "Nightwalker1",
         "fame_rating": 4,
         "age": 26,
         "gender": "Female",
@@ -163,7 +163,7 @@ var users = [
         "last_name": "Emiya",
         "user_name": "Archer",
         "email": "krissultimatum+archer@gmail.com",
-        "password": "Bladeworks",
+        "password": "Bladeworks1",
         "fame_rating": 3,
         "age": 28,
         "gender": "Male",
@@ -176,6 +176,25 @@ var users = [
         "bio4": "",
         "interests": "Housework, Archery, Tinkering",
         "profile": "009.jpg"
+    },
+    {
+        "first_name": "Najenda",
+        "last_name": "Raid",
+        "user_name": "Boss",
+        "email": "krissultimatum+boss@gmail.com",
+        "password": "Susanoo1",
+        "fame_rating": 4,
+        "age": 25,
+        "gender": "Female",
+        "sexual_pref": "Male",
+        "location_lat": -25.686602, 
+        "location_long": 28.149077,
+        "bio": "Najenda is the head of the assassin group Night Raid.\n",
+        "bio2": "She was General of The Empire that defected, along with Lubbock, to the Revolutionary Army sometime after the end of expedition led by her and Esdeath to eliminate the opposition of the Ban Tribe.",
+        "bio3": "",
+        "bio4": "",
+        "interests": "Strategic Games, Cold Jokes, Bad Puns",
+        "profile": "010.png"
     },
 ];
 
@@ -412,7 +431,7 @@ con.connect(function(err) {
                 });
                 var index = 1;
                 fs.readdirSync(temp_dir).forEach(file => {
-                    if (file[0] != "." && index < 5 && file.length >= 5){
+                    if (file[0] != "." && index < 5 && file.length >= 7){
                         sql = "UPDATE `matcha`.`images` SET `img_0" + index + "` = ";
                         sql += "'" + file + "' WHERE `images`.`unique_key` = '" + unique_key + "'";
                         index++;

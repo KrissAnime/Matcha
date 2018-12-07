@@ -306,7 +306,13 @@ module.exports.search_and_recover = function (data, callback){
                         if (err2){
                             console.log(err2);
                         } else {
-                            sql4 = "SELECT *, (ABS(ACOS(SIN((`location_lat` / 180 * 3.141592))*SIN((? / 180 * 3.141592))+COS((`location_lat` / 180 * 3.141592))*COS((? / 180 * 3.141592))*COS((? / 180 * 3.141592)-(`location_long` / 180 * 3.141592)))) * 6371) `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `distance`";
+                            if (!data.sort_by){
+                                sql4 = "SELECT *, (ABS(ACOS(SIN((`location_lat` / 180 * 3.141592))*SIN((? / 180 * 3.141592))+COS((`location_lat` / 180 * 3.141592))*COS((? / 180 * 3.141592))*COS((? / 180 * 3.141592)-(`location_long` / 180 * 3.141592)))) * 6371) `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `distance`";
+                            } else if (sort_by == "Age"){
+                                sql4 = "SELECT *, (ABS(ACOS(SIN((`location_lat` / 180 * 3.141592))*SIN((? / 180 * 3.141592))+COS((`location_lat` / 180 * 3.141592))*COS((? / 180 * 3.141592))*COS((? / 180 * 3.141592)-(`location_long` / 180 * 3.141592)))) * 6371) `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `profiles`.`age`, `distance`";                                
+                            } else {
+                                sql4 = "SELECT *, (ABS(ACOS(SIN((`location_lat` / 180 * 3.141592))*SIN((? / 180 * 3.141592))+COS((`location_lat` / 180 * 3.141592))*COS((? / 180 * 3.141592))*COS((? / 180 * 3.141592)-(`location_long` / 180 * 3.141592)))) * 6371) `distance` FROM `matcha`.`profiles` WHERE `user_name` != '" + data.user + "' ORDER BY `profiles`.`fame_rating`, `distance`";                                
+                            }
                             con.query(sql4, [me.lat, me.lat, me.long], function(err4, result4){
                                 if (err4){
                                     console.log(err4);

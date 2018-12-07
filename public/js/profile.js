@@ -11,7 +11,6 @@ function blowup(event, img){
     modal.style.display = "block";
     modalImg.style.backgroundImage = 'url(' + img + ')';
     photo.value = event.target.id.slice(-1);
-    console.log(photo.value);
 }
 
 // Get the <span> element that closes the modal

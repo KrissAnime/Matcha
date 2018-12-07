@@ -86,7 +86,7 @@
     padding: 2px;
     border-radius: 3%;
     border: 2px solid black;
-    background-color: blueviolet;
+    background-color: black;
     grid-area: corner;
 }
 
@@ -98,14 +98,6 @@
     grid-area: middle;
 }
 
-#profile_suggested_users{
-    width: 100%;
-    height: 100%;
-    background-color: greenyellow;
-    float: right;
-    grid-area: right;
-}
-
 #user_profile1{
     display: block;
 	background-position: center; /* Center the image */
@@ -114,7 +106,7 @@
     padding: 2px;
     border-radius: 3%;
     border: 2px solid white;
-    background-color: orange;
+    background-color: black;
     grid-area: user_profile1;
 }
 
@@ -126,7 +118,7 @@
     padding: 2px;
     border-radius: 3%;
     border: 2px solid white;
-    background-color: yellow;
+    background-color: black;
     grid-area: user_profile2;
 }
 
@@ -138,7 +130,7 @@
     padding: 2px;
     border-radius: 3%;
     border: 2px solid white;
-    background-color: red;
+    background-color: black;
     grid-area: user_profile3;
 }
 
@@ -150,7 +142,7 @@
     padding: 2px;
     border-radius: 3%;
     border: 2px solid white;
-    background-color: plum;
+    background-color: black;
     grid-area: user_profile4;
 }
 
