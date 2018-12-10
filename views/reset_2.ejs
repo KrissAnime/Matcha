@@ -5,12 +5,12 @@
 
 <div id="login_class">
     <form action="" method="post" id="login_form" name="login_form" style="width: 20%">
-        <label for="email">Email:</label> <input type="text" size="30" id="email" maxlength="30" name="email" placeholder="Email..."><br/>
+        <label for="email">Email:</label> <input type="text" size="30" id="email" maxlength="50" name="email" placeholder="Email..."><br/>
         <label>Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="password" name="password" placeholder="Password..."><br/>
         <label>Confirm Password:</label> <input type="password" minlength=6 maxlength="30" size="30" id="mpassword" name="mpassword" placeholder="Confirm Password..."><br/>
         <button type="submit" id="login">Submit</button>
     </form>
-    <% if (error){
+    <% if (error){ %>
         <h6 style="text-align: center"><%= error %></h6>
     <% } %>
 </div>

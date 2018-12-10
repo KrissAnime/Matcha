@@ -821,7 +821,6 @@ app.get('/search', function (req, res) {
                         var tag_1 = req.query.tag1_select;
                         var tag_2 = req.query.tag2_select;
                         var tag_3 = req.query.tag3_select;
-                        var sort_by =  req.query.sort_by;
                         if (age_low || age_max || rating || dist || tag_1 || tag_2 || tag_3){
                             var data = {
                                 age_low: age_low,
@@ -833,7 +832,6 @@ app.get('/search', function (req, res) {
                                 tag_3: tag_3,
                                 user: req.session.username,
                                 blocker_key: blocker_key,
-                                sort_by: sort_by
                             };
                         } else {
                             var data = null;
@@ -851,6 +849,7 @@ app.get('/search', function (req, res) {
                                     tags: result,
                                     matches: resp,
                                     session: req.session.username,
+                                    my_key: result2[0].unique_key
                                 });
                             }
                         });
