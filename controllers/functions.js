@@ -6,7 +6,7 @@ const publicIp = require('public-ip');
 
 function mailman(data, callback){
     var mailOptions = {
-        from: 'KrissAdmin@matcha.com',
+        from: '', //Insert who the mail is coming from here
         to: data.email,
         subject: data.subject,
         text: data.text
@@ -34,8 +34,8 @@ function verify_password(password){
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'krissultimatum@gmail.com',
-        pass: 'lifeisahighway18'
+        user: '', //Insert and email and its password here to user nodemailer
+        pass: ''
     }
 });
 
